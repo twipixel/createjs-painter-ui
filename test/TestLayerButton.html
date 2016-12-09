@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LayerButton 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="400" height="100" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/controls/SimpleButton.js"></script>
+<script src="../src/js/controls/LayerButton.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var eventListener;
+    var layer1, layer2, layer3, layerList;
+
+    function handleLoadComplete() {
+        console.log('[[handleLoadComplete]]');
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        startTest();
+    }
+
+    function startTest() {
+        console.log('startTest');
+
+        QUnit.test('LayerButton 테스트', function (assert) {
+            assert.equal(0, 0, '생성 테스트');
+
+            layer1 = new nts.Painter.LayerButton(nts.Painter.LayerButton.TYPE_FIRST, '레이어 1');
+            layer2 = new nts.Painter.LayerButton(nts.Painter.LayerButton.TYPE_REST, '레이어 2');
+            layer3 = new nts.Painter.LayerButton(nts.Painter.LayerButton.TYPE_REST, '레이어 3');
+            layer1.x = 20;
+            layer1.y = 20;
+            layer2.x = layer1.x + layer1.width - 10;
+            layer2.y = 20;
+            layer3.x = layer2.x + layer2.width - 10;
+            layer3.y = 20;
+            stage.addChild(layer3);
+            stage.addChild(layer2);
+            stage.addChild(layer1);
+            layerList = [layer1, layer2, layer3];
+
+            layer1.on('changeSelected', changeSelectedHandler);
+            layer2.on('changeSelected', changeSelectedHandler);
+            layer3.on('changeSelected', changeSelectedHandler);
+            layer1.on('changeVisible', changeVisibleHandler);
+            layer2.on('changeVisible', changeVisibleHandler);
+            layer3.on('changeVisible', changeVisibleHandler);
+
+            stage.update();
+        });
+    }
+
+    function changeSelectedHandler(event) {
+        var layerButton = event.currentTarget;
+
+        for (var i = 0; i < layerList.length; i++) {
+            if (layerList[i] != layerButton) {
+                if (layerList[i].getSelected())
+                    layerList[i].setSelected(false);
+            }
+
+            console.log(i + '.selected = ' + layerList[i].getSelected() + ', visible = ' + layerList[i].getVisible());
+        }
+    }
+
+    function changeVisibleHandler(event) {
+        var layerButton = event.currentTarget;
+        for (var i = 0; i < layerList.length; i++) {
+            console.log(i, '.visible: ', layerList[i].getVisible());
+        }
+    }
+
+
+</script>
+</body>
+</html>

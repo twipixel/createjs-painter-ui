@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>HueBar 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="300" height="140" style="background-color:#FFFFFF"></canvas>
+</div>
+<div id="colorField">
+    <canvas id="output" width="50" height="50" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/vo/HueBarVO.js"></script>
+<script src="../src/js/controls/HueBar.js"></script>
+<script src="../src/js/utils/ColorUtil.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+
+    var outputContext = document.getElementById('output').getContext('2d');
+
+    var hueBar;
+    var eventListener;
+
+    function handleLoadComplete() {
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        nts.hueBar = hueBar = new nts.Painter.HueBar(lib.HueBar, lib.HueBarSelector);
+        hueBar.x = 20;
+        hueBar.y = 20;
+        stage.addChild(hueBar);
+
+        startTest();
+        stage.update();
+    }
+
+
+    function startTest() {
+        QUnit.test('selectorY 테스트', function (assert) {
+
+            var hueBarVO = new nts.Painter.HueBarVO();
+            hueBarVO.selectorY = 20;
+            hueBar.setVO(hueBarVO);
+
+            assert.equal(0, 0, 'selectorY 를 설정하면 커서가 해당 좌표로 이동합니다.');
+        });
+
+        hueBar.on('colorChange', function (event) {
+            outputContext.clearRect(20, 0, 30, 30);
+            outputContext.fillStyle = hueBar.getVO().color;
+            outputContext.fillRect(20, 0, 30, 30);
+        })
+    }
+
+</script>
+</body>
+</html>

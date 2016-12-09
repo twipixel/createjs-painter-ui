@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ColorUtil 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.min.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="../src/js/utils/ColorUtil.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+
+    QUnit.test('ColorVO 변환 테스트', function (assert) {
+        assert.equal(1, 1, '사이즈 기본값은 1입니다.');
+    });
+
+
+    var testCaseList = [
+        {
+            color: '#4eab40',
+            r: 78,
+            g: 171,
+            b: 64,
+            aColor: '#4fab40',
+            aR: 79,
+            aG: 171,
+            ab: 64,
+        },
+        {
+            color: '#4eab40',
+            r: 78,
+            g: 171,
+            b: 64,
+            aColor: '#4fab40',
+            aR: 79,
+            aG: 171,
+            ab: 64,
+        }
+    ];
+
+    var red, green, blue, rgb, hsv, hex, color, alpha, restore, result, testCase;
+    var h, s, v, r, g, b;
+
+
+
+    testCase = testCaseList[0];
+    console.log('color', testCase.color);
+
+    rgb = nts.Painter.ColorUtil.hexToRgb(testCase.color);
+    console.log('rgb', rgb.r, rgb.g, rgb.b);
+    console.log('expect', testCase.r, testCase.g, testCase.b);
+
+    hsv = nts.Painter.ColorUtil.rgbToHsv(rgb.r, rgb.g, rgb.b);
+    console.log('hsv', hsv[0], hsv[1], hsv[2]);
+
+    restore = nts.Painter.ColorUtil.hsvToRgb(hsv[0] * 360, hsv[1] * 100, hsv[2] * 100);
+    console.log('restore', restore[0], restore[1], restore[2]);
+
+    hex = '#' + nts.Painter.ColorUtil.rgbToHex(restore[0], restore[1], restore[2]);
+    console.log('hex', hex);
+
+
+
+</script>
+</body>
+</html>

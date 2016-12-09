@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ScreenToneButton 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="300" height="160" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/vo/ScreenToneVO.js"></script>
+<script src="../src/js/controls/ScreenToneButton.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var buttonSpace = 10;
+    var buttonWidth = 32;
+    var buttonHeight = 32;
+    var cornerRadius = 2;
+
+    var eventListener;
+    var s1, s2, s3, s4, s5, s6;
+
+
+    function handleLoadComplete() {
+        console.log('[[handleLoadComplete]]');
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        startTest();
+    }
+
+    function startTest() {
+        console.log('[[startTest]]');
+
+        QUnit.test('생성자를 통해 버튼 설정 테스트', function (assert) {
+            s1 = new nts.Painter.ScreenToneButton(
+                    lib.ScreenToneIcon1, buttonWidth, buttonHeight, cornerRadius);
+            s1.x = buttonSpace;
+            s1.y = buttonSpace;
+            stage.addChild(s1);
+            stage.update();
+
+            assert.equal(s1.width, buttonWidth, '설정한 넓이로 표시되는지 확인 합니다.');
+            assert.equal(s1.height, buttonHeight, '설정한 높이로 표시되는지 확인 합니다.');
+            assert.equal(s1.cornerRadius, cornerRadius, '설정한 반지름으로 설정되었는지 확인 합니다.');
+        });
+
+        QUnit.test('Setter로 버튼 설정 테스트', function (assert) {
+            s2 = new nts.Painter.ScreenToneButton();
+            s2.x = buttonSpace + (buttonWidth + buttonSpace) * 1;
+            s2.y = buttonSpace;
+            s2.setWidth(buttonWidth);
+            s2.setHeight(buttonHeight);
+            s2.setCornerRadius(cornerRadius);
+            s2.setIconImage(lib.ScreenToneIcon2);
+            stage.addChild(s2);
+            stage.update();
+
+            assert.equal(s2.width, buttonWidth, '설정한 넓이로 표시되는지 확인 합니다.');
+            assert.equal(s2.height, buttonHeight, '설정한 높이로 표시되는지 확인 합니다.');
+            assert.equal(s2.cornerRadius, cornerRadius, '설정한 반지름으로 설정되었는지 확인 합니다.');
+        });
+
+        QUnit.test('Selectd 설정 테스트', function (assert) {
+            s3 = new nts.Painter.ScreenToneButton();
+            s3.x = buttonSpace + (buttonWidth + buttonSpace) * 2;
+            s3.y = buttonSpace;
+            s3.setWidth(buttonWidth);
+            s3.setHeight(buttonHeight);
+            s3.setCornerRadius(cornerRadius);
+            s3.setIconImage(lib.ScreenToneIcon3);
+            s3.setSelected(true);
+            stage.addChild(s3);
+            stage.update();
+
+            s1.on('click', clickHandler, this);
+            s2.on('click', clickHandler, this);
+            s3.on('click', clickHandler, this);
+
+            assert.equal(s3.getSelected(), true, '선택 상태가 제대로 표시되는지 확인 합니다.');
+        });
+
+
+        function clickHandler(event){
+            var button = event.currentTarget;
+            button.setSelected(!button.getSelected());
+        }
+
+
+    }
+
+</script>
+</body>
+</html>

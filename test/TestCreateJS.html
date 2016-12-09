@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CreateJS 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="400" height="300" style="border:1px solid #000000"></canvas>
+</div>
+<div id="color-info" style="position:absolute;left:0;top:0;width:104px;height:135px;z-index:4;display:none">
+    <canvas id="color-panel" width="104" height="135"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="../src/js/constant/CONSTANT.js"></script>
+<script src="../src/js/utils/ColorUtil.js"></script>
+<script src="../src/js/vo/PenVO.js"></script>
+<script src="../src/js/vo/PaintVO.js"></script>
+<script src="../src/js/vo/ScreenToneVO.js"></script>
+<script src="../src/js/vo/EraserVO.js"></script>
+<script src="../src/js/vo/ToolSettingVO.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+
+    var stage = new c.Stage('canvas');
+
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+
+
+    var captureImageData = context.getImageData(0, 0, 10, 10);
+
+    console.log(captureImageData.toString());
+    console.dir(captureImageData);
+
+
+    context.fillStyle = '#ffff00';
+    context.fillRect(0, 0, 10, 10);
+
+    var afterCaptureImageData = context.getImageData(0, 0, 10, 10);
+    console.dir(afterCaptureImageData);
+
+    var TestClass = function () {
+
+    }
+
+    var p = c.extend(TestClass, c.EventDispatcher);
+
+    p.addEventListener = function () {
+        console.log('중복 함수');
+    }
+
+    window.TestClass = c.promote(TestClass, 'EventDispatcher');
+
+    var ins = new TestClass();
+
+    console.dir(ins);
+    console.dir(c.Stage);
+    console.dir(this);
+
+    var shape = new c.Shape();
+    console.dir(shape);
+
+    stage.addChild(shape);
+
+
+    ///////////////////////////////////////////////////////
+    // 테스트 콘테이너 생성
+    ///////////////////////////////////////////////////////
+
+
+    var Widget = function () {
+        this.Container_constructor();
+        this._init();
+    };
+
+    var p = c.extend(Widget, c.Container);
+
+    p._init = function () {
+
+        console.log('## Widet._init');
+        console.log(this);
+        this.circleButtonContainer = new CircleButtonContainer();
+        this.addChild(this.circleButtonContainer);
+
+
+        this.addEventListener('added', this._onaddedtostage);
+    };
+
+    p._onaddedtostage = function() {
+        this.stage.update();
+    };
+
+    Widget = c.promote(Widget, 'Container');
+
+
+    ///////////////////////////////////////////////////////
+    // 테스트 버튼 생성
+    ///////////////////////////////////////////////////////
+
+
+    var CircleButton = function (radius) {
+        this.Container_constructor();
+        this._init(radius);
+    };
+
+    var p = c.extend(CircleButton, c.Container);
+
+    p._init = function (radius) {
+
+        this.radius = radius || 10;
+
+        this.width = this.radius * 2;
+        this.height = this.radius * 2;
+
+        this.shape = new c.Shape();
+        this.shape.graphics.beginFill('red')
+                .drawCircle(0, 0, this.radius)
+                .endFill();
+
+        this.addChild(this.shape);
+        this.on('added', this._onaddedtostage, this);
+        this.on('mousedown', this._onmousedown, this);
+        this.addEventListener('click', this._onmouseaction);
+        this.addEventListener('pressup', this._onmouseaction);
+    };
+
+    p._onaddedtostage = function() {
+        console.log('_onaddedtostage')
+    };
+
+    p._onmouseaction = function (e) {
+        console.log('   CircleButton.' + e.type);
+
+        if(e.type === 'stagemouseup')
+            this.stage.off('stagemouseup', this.stagemouseupListener);
+    };
+
+
+    p._onmousedown = function(e) {
+        console.log('***** onmousedown');
+
+        this.stagemouseupListener = this.stage.on('stagemouseup', this._onmouseaction, this);
+    };
+
+
+    window.CircleButton = c.promote(CircleButton, 'Container');
+
+
+    ///////////////////////////////////////////////////////
+    // 버튼에 버튼 생성
+    ///////////////////////////////////////////////////////
+
+
+    var CircleButtonContainer = function () {
+        this.Container_constructor();
+        this._init();
+    };
+
+    var p = c.extend(CircleButtonContainer, c.Container);
+
+    p._init = function () {
+        this.circleButton = new CircleButton(30);
+        this.circleButton.x = this.circleButton.radius;
+        this.circleButton.y = this.circleButton.radius;
+        this.circleButton.addEventListener('click', this._onmouseaction);
+        this.circleButton.addEventListener('mousedown', this._onmouseaction);
+        this.circleButton.addEventListener('pressup', this._onmouseaction);
+        this.addChild(this.circleButton);
+
+        this.addEventListener('added', this._onaddedtostage);
+    };
+
+    p._onaddedtostage = function() {
+        this.stage.update();
+    };
+
+    p._onmouseaction = function(e) {
+        console.log('CircleButtonContainer.' + e.type);
+    };
+
+    CircleButtonContainer = c.promote(CircleButtonContainer, 'Container');
+
+
+
+    var widget = new Widget();
+    stage.addChild(widget);
+
+
+    console.log(widget);
+
+
+    QUnit.test('CreateJS 테스트', function (assert) {
+        var vo = new nts.Painter.PenVO();
+        assert.equal(vo.getSize(), 1, '');
+    });
+
+
+</script>
+</body>
+</html>

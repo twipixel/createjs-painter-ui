@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ColorPicker 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="button">
+    <canvas id="buttonCanvas" width="500" height="60" style="background-color:#FFFFFF"></canvas>
+</div>
+<div id="content">
+    <canvas id="canvas" width="400" height="600" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+
+<!-- Util -->
+<script src="../src/js/utils/ColorUtil.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+
+<script src="../src/js/vo/ColorVO.js"></script>
+
+<!-- HueBar -->
+<script src="../src/js/vo/HueBarVO.js"></script>
+<script src="../src/js/controls/HueBar.js"></script>
+
+<!-- HSVPalette -->
+<script src="../src/js/vo/HSVPaletteVO.js"></script>
+<script src="../src/js/controls/HSVPalette.js"></script>
+
+<!-- ColorPickerPalette -->
+<script src="../src/js/controls/ColorPickerPalette.js"></script>
+
+<!-- SimpleButton -->
+<script src="../src/js/controls/SimpleButton.js"></script>
+
+<!-- ColorPicker -->
+<script src="../src/js/controls/ColorPicker.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+    var buttonStage = new c.Stage('buttonCanvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var colorRect;
+    var colorPicker;
+    var eventListener;
+
+
+    function handleLoadComplete() {
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        stage.on('stagemousedown', stageMouseDownHandler, this);
+
+        colorPicker = new nts.Painter.ColorPicker();
+        colorPicker.x = 20;
+        colorPicker.y = 20;
+        colorPicker.on('colorChange', colorChangeHandler, this);
+        colorPicker.on('selectColor', selectColorHandler, this);
+        stage.addChild(colorPicker);
+        stage.update();
+
+        colorRect = new c.Shape();
+        colorRect.x = 20;
+        colorRect.y = 250;
+        stage.addChild(colorRect);
+
+        startTest();
+    }
+
+    function stageMouseDownHandler() {
+        console.log('stageMouseDownHandler');
+        var vo = colorPicker.getVO();
+        colorPicker.pushColor([vo.red, vo.green, vo.blue]);
+    }
+
+
+    function colorChangeHandler() {
+        var vo = colorPicker.getVO();
+    }
+
+    function selectColorHandler() {
+        var selectedColor = colorPicker.selectedColor;
+
+        console.log('selectColorHandler', selectedColor);
+
+        colorRect.graphics
+                .clear()
+                .beginFill(selectedColor)
+                .drawRect(0, 0, 80, 40)
+                .endFill();
+
+        stage.update();
+    }
+
+    function startTest() {
+        QUnit.test('기본 생성 테스트', function (assert) {
+            assert.equal(0, 0, 'ColorPicker를 생성합니다');
+        });
+    }
+
+    function createGuideText(msg) {
+        var guideText = msg;
+        console.log(guideText);
+        var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+        stage.addChild(guideTextField);
+        stage.update();
+        return guideTextField;
+    }
+
+    function createButton() {
+        var btn = new c.Shape();
+        var btnWidth = 80;
+        var btnHeight = 40;
+        btn.graphics
+            //.setStrokeStyle(1)
+            //.beginStroke('red')
+                .beginFill('orange')
+                .drawRoundRect(0, 0, btnWidth, btnHeight, 4)
+                .endFill();
+        btn.x = 20;
+        btn.y = 10;
+        buttonStage.addChild(btn);
+        buttonStage.update();
+        return btn;
+    }
+
+</script>
+</body>
+</html>

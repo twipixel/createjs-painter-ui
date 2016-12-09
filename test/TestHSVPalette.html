@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>HSVPallette 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="790" height="615" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/vo/HueBarVO.js"></script>
+<script src="../src/js/vo/HSVPaletteVO.js"></script>
+<script src="../src/js/controls/HueBar.js"></script>
+<script src="../src/js/controls/HSVPalette.js"></script>
+<script src="../src/js/utils/ColorUtil.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var hueBar;
+    var hsvPalette;
+    var eventListener;
+
+
+    function handleLoadComplete() {
+        console.log('[[handleLoadComplete]]');
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        stage.enableMouseOver();
+
+        hueBar = new nts.Painter.HueBar(lib.HueBar, lib.HueBarSelector);
+        hueBar.x = 20;
+        hueBar.y = 20;
+        hueBar.on('colorChange', hueBarColorChangeHandler, this);
+        stage.addChild(hueBar);
+
+        hsvPalette = new nts.Painter.HSVPalette(lib.HSVPaletteOverlayGradient, lib.HSVPaletteSelector);
+        hsvPalette.x = 70;
+        hsvPalette.y = 20;
+        hsvPalette.setHueBarVO(hueBar.getVO());
+        hsvPalette.on('colorChange', hsvPaletteColorChangeHandler, this);
+        stage.addChild(hsvPalette);
+
+        colorRect = new c.Shape();
+        colorRect.x = hsvPalette.x + hsvPalette.width + 20;
+        colorRect.y = 20;
+        stage.addChild(colorRect);
+
+        setColorRect('#000000');
+        stage.update();
+
+        startTest();
+    }
+
+
+    function setColorRect(color) {
+        this.colorRect.graphics.clear();
+        this.colorRect.graphics
+                .beginFill(color)
+                .drawRect(0, 0, hsvPalette.width / 1.4, hsvPalette.height / 3)
+                .endFill();
+
+        this.stage.update();
+    }
+
+    function startTest() {
+        console.log('[[startTest]]', hsvPalette);
+
+        QUnit.test('HSV팔렛트 생성 테스트', function (assert) {
+            assert.equal(0, 0, '기본 생성 테스트입니다.');
+        });
+    }
+
+    function hueBarColorChangeHandler(event) {
+        hsvPalette.setHueBarVO(hueBar.getVO());
+    }
+
+    function hsvPaletteColorChangeHandler(event) {
+        setColorRect(hsvPalette.getVO().color);
+    }
+
+</script>
+</body>
+</html>

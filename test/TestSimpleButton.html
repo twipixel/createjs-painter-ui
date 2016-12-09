@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SimpleButton 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="400" height="100" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/controls/SimpleButton.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var eventListener;
+    var s1, s2, s3, s4, s5;
+
+    function handleLoadComplete() {
+        console.log('[[handleLoadComplete]]');
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        //stage.enableMouseOver();
+
+        startTest();
+    }
+
+    function startTest() {
+        console.log('startTest');
+
+        QUnit.test('SimpleButton 일반 버튼 테스트', function (assert) {
+            var done = assert.async();
+
+            s1 = new nts.Painter.SimpleButton(lib.ButtonSpoidNormal, lib.ButtonSpoidSelected, false);
+            s1.x = 20;
+            s1.y = 20;
+            stage.addChild(s1);
+
+            eventListener = s1.on('click', function () {
+                s1.off('click', eventListener);
+                stage.removeChild(s1);
+                assert.equal(0, 0, '일반 버튼 생성 테스트 입니다.');
+                done();
+
+                testToggleButton();
+            });
+        });
+    }
+
+    function testToggleButton() {
+        QUnit.test('SimpleButton 토글 버튼 테스트', function (assert) {
+
+            var count = 0;
+            var done = assert.async();
+
+            s2 = new nts.Painter.SimpleButton(lib.ButtonRedoNormal, lib.ButtonRedoSelected, true);
+            s2.x = s1.x + s1.width + 20;
+            s2.y = 20;
+            stage.addChild(s2);
+
+            eventListener = s2.on('click', function () {
+
+                if(count++ == 1) {
+                    s2.off('click', eventListener);
+                    assert.equal(0, 0, '토글 버튼 테스트 입니다.');
+                    done();
+
+                    testToggleSet();
+                }
+
+            });
+        });
+    }
+
+    function testToggleSet() {
+        QUnit.test('SimpleButton 토글상태에서 selected 변경 테스트', function (assert) {
+
+            var count = 0;
+            var done = assert.async();
+
+            s3 = new nts.Painter.SimpleButton(lib.ButtonUndoNormal, lib.ButtonUndoSelected, true);
+            s3.x = s2.x;
+            s3.y = s2.y + s2.height;
+            stage.addChild(s3);
+
+            var testFunction = function() {
+                console.log('s3.getSelected() : ' + s3.getSelected());
+                s3.setSelected(!s3.getSelected());
+
+                if(count++ == 2) {
+                    clearInterval(eventListener);
+                    assert.equal(0, 0, '토글 버튼 set 테스트 입니다.');
+                    done();
+                    testSimpleButton();
+                }
+            }
+            eventListener = setInterval(testFunction, 1000);
+        });
+    }
+
+    function testSimpleButton() {
+        s1 = new nts.Painter.SimpleButton(lib.ButtonSpoidNormal, lib.ButtonSpoidSelected, false, s1ClickHandler);
+        s1.x = 20;
+        s1.y = 20;
+        stage.addChild(s1);
+
+        s4 = new nts.Painter.SimpleButton(lib.ButtonMinusNormal, lib.ButtonMinusSelected, false);
+        s4.x = s3.x + s3.width + 20;
+        s4.y = 20;
+        s4.clickCallback = s4ClickHandler;
+        stage.addChild(s4);
+
+        s5 = new nts.Painter.SimpleButton(lib.ButtonPlusNormal, lib.ButtonPlusSelected, true);
+        s5.x = s4.x + s4.width;
+        s5.y = 20;
+        s5.clickCallback = s5ClickHandler;
+        stage.addChild(s5);
+    }
+
+
+    function s1ClickHandler() {
+        console.log('s1ClickHandler()');
+    }
+
+    function s4ClickHandler() {
+        console.log('s4ClickHandler()');
+    }
+
+    function s5ClickHandler() {
+        console.log('s5ClickHandler()');
+    }
+
+</script>
+</body>
+</html>

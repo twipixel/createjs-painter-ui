@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ColorPickerPalette 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="button">
+    <canvas id="buttonCanvas" width="500" height="60" style="background-color:#FFFFFF"></canvas>
+</div>
+<div id="content">
+    <canvas id="canvas" width="300" height="140" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="../src/js/vo/ColorVO.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/controls/ColorPickerPalette.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+    var buttonStage = new c.Stage('buttonCanvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var colorRect;
+    var eventListener;
+    var colorPickerPalette;
+
+
+    function handleLoadComplete() {
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        colorPickerPalette = new nts.Painter.ColorPickerPalette();
+        colorPickerPalette.x = 20;
+        colorPickerPalette.y = 20;
+        stage.addChild(colorPickerPalette);
+
+        colorRect = new c.Shape();
+        colorRect.x = 20;
+        colorRect.y = 80;
+        stage.addChild(colorRect);
+
+        startTest();
+    }
+
+    function startTest() {
+        QUnit.test('기본 생성 테스트', function (assert) {
+            assert.equal(0, 0, 'ColorPickerPalette를 생성합니다');
+
+            pushTest();
+
+            /*maxPush();
+            morePushTest();*/
+        });
+    }
+
+    function pushTest() {
+        QUnit.test('팔렛트 색상 추가 테스트', function (assert) {
+
+            var count = 0;
+            var btn = createButton();
+            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(28회)');
+            var done = assert.async();
+
+            eventListener = btn.on('click', function () {
+                if (count++ == 28) {
+                    assert.equal(0, 0, '');
+                    done();
+
+                    btn.off('click', eventListener);
+                    stage.removeChild(guideTextField);
+                    buttonStage.removeChild(btn);
+                    setTimeout(morePushTest, 500);
+                }
+
+                var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                colorPickerPalette.push(randomColor);
+            })
+        });
+    }
+
+    function maxPush() {
+        for (var i = 0; i < 26; i++) {
+            var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            colorPickerPalette.push(randomColor);
+        }
+    }
+
+    function morePushTest() {
+        QUnit.test('색상 꽉 찼을 때 색상 추가하기', function (assert) {
+
+            var count = 0;
+            var btn = createButton();
+            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(10회)');
+            var done = assert.async();
+
+            eventListener = btn.on('click', function () {
+                if (count++ == 10) {
+                    assert.equal(0, 0, '');
+                    done();
+
+                    btn.off('click', eventListener);
+                    stage.removeChild(guideTextField);
+                    buttonStage.removeChild(btn);
+                    setTimeout(paletteClickTest, 500);
+                }
+                var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                colorPickerPalette.push(randomColor);
+            })
+        });
+    }
+
+    function paletteClickTest() {
+        QUnit.test('셀 선택 이벤트 테스트', function (assert) {
+
+            var count = 0;
+            var guideTextField = createGuideText('셀을 클릭해주세요. (10회)');
+            var done = assert.async();
+
+            eventListener = colorPickerPalette.on('selectColor', function(event) {
+                colorRect.graphics.clear()
+                        .beginFill(colorPickerPalette.selectedColor)
+                        .drawRect(0, 0, 80, 40)
+                        .endFill();
+
+                if (count++ == 10) {
+                    assert.equal(0, 0, '');
+                    done();
+
+                    stage.removeChild(guideTextField);
+                }
+
+                stage.update();
+            });
+        });
+    }
+
+    function createGuideText(msg) {
+        var guideText = msg;
+        console.log(guideText);
+        var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+        stage.addChild(guideTextField);
+        stage.update();
+        return guideTextField;
+    }
+
+    function createButton() {
+        var btn = new c.Shape();
+        var btnWidth = 80;
+        var btnHeight = 40;
+        btn.graphics
+            //.setStrokeStyle(1)
+            //.beginStroke('red')
+                .beginFill('orange')
+                .drawRoundRect(0, 0, btnWidth, btnHeight, 4)
+                .endFill();
+        btn.x = 20;
+        btn.y = 10;
+        buttonStage.addChild(btn);
+        buttonStage.update();
+        return btn;
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ToolSettingPanel 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="button">
+    <canvas id="buttonCanvas" width="500" height="60" style="background-color:#FFFFFF"></canvas>
+</div>
+<div id="content">
+    <canvas id="canvas" width="500" height="200" style="background-color:#FFFFFF"></canvas>
+</div>
+
+<!-- QUnit -->
+<script src="./qunitjs/qunit/qunit.js"></script>
+
+<!-- CreateJS -->
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<!-- Assets -->
+<script src="assets/Assets.js"></script>
+
+<!-- CONSTANT -->
+<script src="../src/js/constant/CONSTANT.js"></script>
+
+<!-- Value Object -->
+<script src="../src/js/vo/PenVO.js"></script>
+<script src="../src/js/vo/PaintVO.js"></script>
+<script src="../src/js/vo/ScreenToneVO.js"></script>
+<script src="../src/js/vo/EraserVO.js"></script>
+<script src="../src/js/vo/ToolSettingVO.js"></script>
+
+<!-- Util -->
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+
+<!-- Slider -->
+<script src="../src/js/controls/Slider.js"></script>
+
+<!-- ScreenToneButton -->
+<script src="../src/js/controls/ScreenToneButton.js"></script>
+
+<!-- PenSizeDisplayer -->
+<script src="../src/js/controls/PenSizeDisplayer.js"></script>
+
+<!-- ToolSettingPanel -->
+<script src="../src/js/controls/ToolSettingPanel.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+    var buttonStage = new c.Stage('buttonCanvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var eventListener;
+    var toolSettingPanel;
+
+    function handleLoadComplete() {
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        toolSettingPanel = new nts.Painter.ToolSettingPanel(nts.Painter.CONSTANT.TOOL_TYPE_PEN);
+        toolSettingPanel.x = 20;
+        toolSettingPanel.y = 20;
+        stage.addChild(toolSettingPanel);
+        stage.update();
+
+        startTest();
+    }
+
+    function startTest() {
+        QUnit.test('기본 생성 테스트', function (assert) {
+            assert.equal(0, 0, 'ToolSettingPanel을 생성합니다');
+
+            testPenSizeVO();
+        });
+    }
+
+    function testPenSizeVO() {
+        QUnit.test('PenVO.size 변경/설정 테스트', function (assert) {
+
+            var guideTextField = createGuideText('사이즈를 변경하세요.');
+            var done = assert.async();
+
+            eventListener = stage.on('stagemouseup', function () {
+                assert.equal(
+                        toolSettingPanel.getVO().penVO.getSize(),
+                        toolSettingPanel.getPenSize(),
+                        'PenVO.size와 슬라이더 값이 동일한지 확인합니다..');
+                console.log('toolSettingPanel.getPenSize() : ', toolSettingPanel.getPenSize());
+                console.log('toolSettingPanel.getVO().penVO.getSize() : ', toolSettingPanel.getVO().penVO.getSize());
+                done();
+
+                stage.off('stagemouseup', eventListener);
+                stage.removeChild(guideTextField);
+                stage.update();
+                setTimeout(testPenAlphaVO, 500);
+            })
+        });
+    }
+
+    function testPenAlphaVO() {
+        QUnit.test('PenVO.alpha 변경/설정 테스트', function (assert) {
+
+            var guideTextField = createGuideText('투명도를 변경하세요.');
+            var done = assert.async();
+
+            eventListener = stage.on('stagemouseup', function (event) {
+                assert.equal(
+                        toolSettingPanel.getVO().penVO.getAlpha(),
+                        toolSettingPanel.getPenAlpha(),
+                        'PenVO.alpha와 슬라이더 값이 동일한지 확인합니다.');
+                console.log('toolSettingPanel.getPenAlpha() : ', toolSettingPanel.getPenAlpha());
+                console.log('toolSettingPanel.getVO().penVO.getAlpha() : ', toolSettingPanel.getVO().penVO.getAlpha());
+                done();
+
+                stage.off('stagemouseup', eventListener);
+                stage.removeChild(guideTextField);
+                stage.update();
+                setTimeout(testPaintSetting, 500);
+            })
+        });
+    }
+
+    function testPaintSetting() {
+        QUnit.test('Paint 로 설정', function (assert) {
+
+            var btn = createButton();
+            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(페인트 설정으로 변경)');
+            var done = assert.async();
+
+            eventListener = btn.on('click', function () {
+                assert.equal(0, 0, '');
+                done();
+
+                toolSettingPanel.setPanelByToolType(nts.Painter.CONSTANT.TOOL_TYPE_PAINT);
+
+                btn.off('click', eventListener);
+                stage.removeChild(guideTextField);
+                buttonStage.removeChild(btn);
+                stage.update();
+                setTimeout(testPaintAlphaVO, 500);
+            })
+        });
+    }
+
+    function testPaintAlphaVO() {
+        QUnit.test('PaintVO.alpha 변경/설정 테스트', function (assert) {
+
+            var guideTextField = createGuideText('투명도를 변경하세요.');
+            var done = assert.async();
+
+            eventListener = stage.on('stagemouseup', function () {
+                assert.equal(
+                        toolSettingPanel.getVO().paintVO.getAlpha(),
+                        toolSettingPanel.getPenAlpha(),
+                        'PaintVO.alpha와 슬라이더 값이 동일한지 확인합니다..');
+                console.log('toolSettingPanel.getPenAlpha() : ', toolSettingPanel.getPenAlpha());
+                console.log('toolSettingPanel.getVO().penVO.getPenAlpha() : ', toolSettingPanel.getVO().penVO.getAlpha());
+                done();
+
+                stage.off('stagemouseup', eventListener);
+                stage.removeChild(guideTextField);
+                stage.update();
+                setTimeout(testScreenToneSetting, 500);
+            })
+        });
+    }
+
+    function testScreenToneSetting() {
+        QUnit.test('ScreenTone 으로 설정', function (assert) {
+
+            var btn = createButton();
+            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(스크린톤 설정으로 변경)');
+            var done = assert.async();
+
+            eventListener = btn.on('click', function () {
+                assert.equal(0, 0, '');
+                done();
+
+                toolSettingPanel.setPanelByToolType(nts.Painter.CONSTANT.TOOL_TYPE_SCREEN_TONE);
+
+                btn.off('click', eventListener);
+                stage.removeChild(guideTextField);
+                buttonStage.removeChild(btn);
+                stage.update();
+                setTimeout(testScreenToneSizeVO, 500);
+            })
+        });
+    }
+
+    function testScreenToneSizeVO() {
+        QUnit.test('ScreenToneVO.size 변경/설정 테스트', function (assert) {
+
+            var guideTextField = createGuideText('사이즈를 변경하세요.');
+            var done = assert.async();
+
+            eventListener = stage.on('stagemouseup', function () {
+                assert.equal(
+                        toolSettingPanel.getVO().screenToneVO.getSize(),
+                        toolSettingPanel.getPenSize(),
+                        'ScreenToneVO.size와 슬라이더 값이 동일한지 확인합니다..');
+                console.log('toolSettingPanel.getPenSize() : ', toolSettingPanel.getPenSize());
+                console.log('toolSettingPanel.getVO().screenToneVO.getSize() : ', toolSettingPanel.getVO().screenToneVO.getSize());
+                done();
+
+
+                stage.off('stagemouseup', eventListener);
+                stage.removeChild(guideTextField);
+                stage.update();
+                setTimeout(testScreenToneAlphaVO, 500);
+            })
+        });
+    }
+
+    function testScreenToneAlphaVO() {
+        QUnit.test('ScreenToneVO.alpha 변경/설정 테스트', function (assert) {
+
+            var guideTextField = createGuideText('투명도를 변경하세요.');
+            var done = assert.async();
+
+            eventListener = stage.on('stagemouseup', function (event) {
+                assert.equal(
+                        toolSettingPanel.getVO().penVO.getAlpha(),
+                        toolSettingPanel.getPenAlpha(),
+                        'ScreenToneVO.alpha와 슬라이더 값이 동일한지 확인합니다.');
+                console.log('toolSettingPanel.getPenAlpha() : ', toolSettingPanel.getPenAlpha());
+                console.log('toolSettingPanel.getVO().screenToneVO.getAlpha() : ', toolSettingPanel.getVO().screenToneVO.getAlpha());
+                done();
+
+                stage.off('stagemouseup', eventListener);
+                stage.removeChild(guideTextField);
+                stage.update();
+                setTimeout(testEraserSetting, 500);
+            })
+        });
+    }
+
+    function testEraserSetting() {
+        QUnit.test('Eraser 로 설정', function (assert) {
+
+            var btn = createButton();
+            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(지우게 설정으로 변경)');
+            var done = assert.async();
+
+            eventListener = btn.on('click', function () {
+                assert.equal(0, 0, '');
+                done();
+
+                toolSettingPanel.setPanelByToolType(nts.Painter.CONSTANT.TOOL_TYPE_ERASER);
+
+                btn.off('click', eventListener);
+                stage.removeChild(guideTextField);
+                buttonStage.removeChild(btn);
+                stage.update();
+                setTimeout(testEraserSizeVO, 500);
+            })
+        });
+    }
+
+    function testEraserSizeVO() {
+        QUnit.test('EraserVO.size 변경/설정 테스트', function (assert) {
+
+            var guideTextField = createGuideText('사이즈를 변경하세요.');
+            var done = assert.async();
+
+            eventListener = stage.on('stagemouseup', function () {
+                assert.equal(
+                        toolSettingPanel.getVO().eraserVO.getSize(),
+                        toolSettingPanel.getPenSize(),
+                        'EraserVO.size와 슬라이더 값이 동일한지 확인합니다..');
+                console.log('toolSettingPanel.getPenSize() : ', toolSettingPanel.getPenSize());
+                console.log('toolSettingPanel.getVO().eraserVO.getSize() : ', toolSettingPanel.getVO().eraserVO.getSize());
+                done();
+
+                stage.off('stagemouseup', eventListener);
+                stage.removeChild(guideTextField);
+                stage.update();
+                buttonStage.update();
+                setTimeout(testColorSetting, 500);
+            })
+        });
+    }
+
+    function testColorSetting() {
+        QUnit.test('색상 변경', function (assert) {
+
+            var btn = createButton();
+            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(색상 변경)');
+            var done = assert.async();
+
+            eventListener = btn.on('click', function () {
+                assert.equal(0, 0, '');
+                done();
+
+                var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                toolSettingPanel.setPenColor(randomColor);
+
+                stage.removeChild(guideTextField);
+                //buttonStage.removeChild(btn);
+                stage.update();
+
+                if(isTestDone === false)
+                    setTimeout(testNext, 500);
+            })
+        });
+    }
+
+    var isTestDone = false;
+    function testNext() {
+        QUnit.test('테스트 완료', function (assert) {
+            assert.equal(0, 0, '테스트 완료');
+
+            var guideTextField = createGuideText('테스트 완료');
+            stage.addChild(guideTextField);
+            stage.update();
+
+            isTestDone = true;
+        });
+    }
+
+    function createGuideText(msg) {
+        var guideText = msg;
+        console.log(guideText);
+        var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+        stage.addChild(guideTextField);
+        stage.update();
+        return guideTextField;
+    }
+
+    function createButton() {
+        var btn = new c.Shape();
+        var btnWidth = 80;
+        var btnHeight = 40;
+        btn.graphics
+            //.setStrokeStyle(1)
+            //.beginStroke('red')
+                .beginFill('orange')
+                .drawRoundRect(0, 0, btnWidth, btnHeight, 4)
+                .endFill();
+        btn.x = 20;
+        btn.y = 10;
+        buttonStage.addChild(btn);
+        buttonStage.update();
+        return btn;
+    }
+
+</script>
+</body>
+</html>

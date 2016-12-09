@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>전체 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+    <style>
+        .popup {
+            position: absolute;
+            top: 198px;
+            left: 207px;
+            width: 376px;
+            height: 218px;
+            z-index: 50;
+            background: #ffffff;
+            display: none;
+            border-style: solid;
+            border-color: #a0a0a0;
+            border-width: 1px;
+        }
+
+        .dimed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="790" height="615" style="background-color:#e6e9ec"></canvas>
+</div>
+<div id="dimed" class="dimed"></div>
+<div id="popup" class="popup">
+    <canvas id="popup-panel" width="376" height="218" style="background-color:#FFFFFF"></canvas>
+</div>
+
+<!-- QUnit -->
+<script src="./qunitjs/qunit/qunit.js"></script>
+
+<!-- CreateJS -->
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<!-- Assets -->
+<script src="assets/Assets.js"></script>
+
+<!-- CONSTANT -->
+<script src="../src/js/constant/CONSTANT.js"></script>
+
+<!-- Value Object -->
+<script src="../src/js/vo/ColorVO.js"></script>
+<script src="../src/js/vo/PenVO.js"></script>
+<script src="../src/js/vo/PaintVO.js"></script>
+<script src="../src/js/vo/ScreenToneVO.js"></script>
+<script src="../src/js/vo/EraserVO.js"></script>
+<script src="../src/js/vo/ToolSettingVO.js"></script>
+
+<!-- Util -->
+<script src="../src/js/utils/ColorUtil.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+
+<!-- Slider -->
+<script src="../src/js/controls/Slider.js"></script>
+
+<!-- ScreenToneButton -->
+<script src="../src/js/controls/ScreenToneButton.js"></script>
+
+<!-- PenSizeDisplayer -->
+<script src="../src/js/controls/PenSizeDisplayer.js"></script>
+
+<!-- ToolPanel -->
+<script src="../src/js/controls/ToolPanel.js"></script>
+
+<!-- ToolSettingPanel -->
+<script src="../src/js/controls/ToolSettingPanel.js"></script>
+
+<!-- HueBar -->
+<script src="../src/js/vo/HueBarVO.js"></script>
+<script src="../src/js/controls/HueBar.js"></script>
+
+<!-- HSVPalette -->
+<script src="../src/js/vo/HSVPaletteVO.js"></script>
+<script src="../src/js/controls/HSVPalette.js"></script>
+
+<!-- ColorPickerPalette -->
+<script src="../src/js/controls/ColorPickerPalette.js"></script>
+
+<!-- SimpleButton -->
+<script src="../src/js/controls/SimpleButton.js"></script>
+
+<!-- ColorPicker -->
+<script src="../src/js/controls/ColorPicker.js"></script>
+
+<!-- Popup -->
+<script src="../src/js/controls/Popup.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+    var popupStage = new c.Stage('popup-panel');
+
+    var canvasW = stage.canvas.width;
+    var canvasH = stage.canvas.height;
+    var toolPanel, toolSettingPanel, colorPicker,
+            newButton, openButton, tempSaveButton, uploadButton,
+            undoButton, redoButton, handButton, plusButton, minusButton,
+            popup, popupDiv, dimedDiv;
+
+    ss = ss || {};
+    images = images || {};
+
+    popupDiv = document.getElementById("popup");
+    dimedDiv = document.getElementById("dimed");
+
+    // enable touch interactions if supported on the current device:
+    c.Touch.enable(stage);
+
+    // enabled mouse over / out events
+    stage.enableMouseOver(10);
+    stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+
+    progress = stage.addChild(new c.Shape());
+    progress.x = canvasW / 2;
+    progress.y = canvasH * 0.5;
+
+    initProgressBmp();
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    queue.setMaxConnections(8);
+
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function initProgressBmp() {
+        var shape = new c.Shape();
+        shape.graphics.beginFill('#333').drawRect(0, 0, 20, 20).beginFill('#EB2')
+                .moveTo(0, 0).lineTo(10, 0).lineTo(0, 10).closePath()
+                .moveTo(0, 20).lineTo(20, 0).lineTo(20, 10).lineTo(10, 20).closePath();
+        shape.cache(0, 0, 20, 20);
+        progressBmp = shape.cacheCanvas;
+    }
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleProgress(evt) {
+        drawProgress(evt.loaded / evt.total);
+        stage.update(evt);
+    }
+
+    function drawProgress(value) {
+        progress.graphics.clear()
+                .beginFill('#EB2').drawRoundRect(-103, -13, 206, 26, 13)
+                .beginBitmapFill(progressBmp).drawRoundRect(-100, -10, value * 200 | 0, 20, 10);
+    }
+
+    function clearProgress() {
+        progress.graphics.clear();
+        progressBmp = null;
+    }
+
+    function handleLoadComplete() {
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        clearProgress();
+        startApplication();
+    }
+
+    function startApplication() {
+        QUnit.test('기본 생성 테스트', function (assert) {
+
+            headerRect = new c.Shape();
+            headerRect.graphics.beginFill('white')
+                    .drawRect(0, 0, stage.canvas.width, 52)
+                    .beginStroke('#CCCCCC')
+                    .moveTo(0, 52.5)
+                    .lineTo(stage.canvas.width, 52.5)
+                    .endStroke();
+            stage.addChild(headerRect);
+
+            toolPanel = new nts.Painter.ToolPanel();
+            toolPanel.x = 472;
+            toolPanel.y = 79;
+            toolPanel.addEventListener('toolChagne', handleToolChange);
+            stage.addChild(toolPanel);
+
+            toolSettingPanel = new nts.Painter.ToolSettingPanel(toolPanel.getSelectedToolType());
+            toolSettingPanel.x = 472;
+            toolSettingPanel.y = toolPanel.y + toolPanel.height + 6;
+            toolSettingPanel.addEventListener('toolSettingChange', handleToolSettingChange);
+            stage.addChild(toolSettingPanel);
+
+            colorPicker = new nts.Painter.ColorPicker();
+            colorPicker.x = 472;
+            colorPicker.y = toolSettingPanel.y + toolSettingPanel.height + 6;
+            colorPicker.addEventListener('colorChange', handleColorChange);
+            stage.addChild(colorPicker);
+
+            newButton = new nts.Painter.SimpleButton(lib.ButtonNewNormal, lib.ButtonNewSelected, false);
+            newButton.x = 20;
+            newButton.y = 10;
+            newButton.on('click', newButtonClickHanler, this);
+            stage.addChild(newButton);
+
+            openButton = new nts.Painter.SimpleButton(lib.ButtonOpenNormal, lib.ButtonOpenSelected, false);
+            openButton.x = newButton.x + newButton.width + 8;
+            openButton.y = 10;
+            openButton.on('click', openButtonClickHanler, this);
+            stage.addChild(openButton);
+
+            tempSaveButton = new nts.Painter.SimpleButton(lib.ButtonTempSaveNormal, lib.ButtonTempSaveSelected, false);
+            tempSaveButton.x = 616;
+            tempSaveButton.y = 10;
+            stage.addChild(tempSaveButton);
+
+            uploadButton = new nts.Painter.SimpleButton(lib.ButtonUploadNormal, lib.ButtonUploadSelected, false);
+            uploadButton.x = tempSaveButton.x + tempSaveButton.width + 8;
+            uploadButton.y = 10;
+            stage.addChild(uploadButton);
+
+            undoButton = new nts.Painter.SimpleButton(lib.ButtonUndoNormal, lib.ButtonUndoSelected, false, undoClickHandler);
+            undoButton.x = 20;
+            undoButton.y = 555;
+            stage.addChild(undoButton);
+
+            redoButton = new nts.Painter.SimpleButton(lib.ButtonRedoNormal, lib.ButtonRedoSelected);
+            redoButton.x = undoButton.x + undoButton.width + 4;
+            redoButton.y = 555;
+            redoButton.clickCallback = redoClickHandler;
+            stage.addChild(redoButton);
+
+            handButton = new nts.Painter.SimpleButton(lib.ButtonHandNormal, lib.ButtonHandSelected, true, handClickHandler);
+            handButton.x = 342;
+            handButton.y = 555;
+            stage.addChild(handButton);
+
+            minusButton = new nts.Painter.SimpleButton(lib.ButtonMinusNormal, lib.ButtonMinusSelected);
+            minusButton.x = handButton.x + handButton.width + 4;
+            minusButton.y = 555;
+            stage.addChild(minusButton);
+            minusButton.on('click', minusClickHandler, this);
+
+            plusButton = new nts.Painter.SimpleButton(lib.ButtonPlusNormal, lib.ButtonPlusSelected);
+            plusButton.x = minusButton.x + minusButton.width;
+            plusButton.y = 555;
+            stage.addChild(plusButton);
+            plusButton.on('click', plusClickHandler, this);
+
+
+            popup = new nts.Painter.Popup(popupDiv, dimedDiv);
+            popupStage.addChild(popup);
+
+
+            assert.equal(0, 0, 'UI 샘플입니다.');
+        });
+    }
+
+    function handleToolChange() {
+        toolSettingPanel.setPanelByToolType(toolPanel.getSelectedToolType());
+        colorPicker.y = toolSettingPanel.y + toolSettingPanel.height + 6;
+        stage.update();
+    }
+
+    function newButtonClickHanler() {
+        console.log('newButtonClickHanler()');
+        popup.open(nts.Painter.Popup.TYPE_CONFIRM_CANCEL, '그리고 있던 그림이 지워집니다.\n 지워져도 괜찮습니까?', onConfirmHandler, onCancelHandler);
+    }
+
+    function openButtonClickHanler() {
+        console.log('openButtonClickHanler()');
+        popup.open(nts.Painter.Popup.TYPE_CONFIRM, '등록되었습니다.', onConfirmHandler);
+    }
+
+    function onConfirmHandler() {
+        console.log("onConfirmHandler");
+        popup.close();
+    }
+
+    function onCancelHandler() {
+        console.log("onCancelHandler");
+        popup.close();
+    }
+
+    function handleToolSettingChange() {
+        //
+    }
+
+    function handleColorChange() {
+        //
+    }
+
+    function undoClickHandler() {
+        console.log('undoButton click');
+    }
+
+    function redoClickHandler() {
+        console.log('redoButton click');
+    }
+
+    function handClickHandler() {
+        console.log('handButton click');
+    }
+
+    function minusClickHandler() {
+        console.log('minusButton click');
+    }
+
+    function plusClickHandler() {
+        console.log('plusButton click');
+    }
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Value Object 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.min.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="../src/js/constant/CONSTANT.js"></script>
+<script src="../src/js/vo/PenVO.js"></script>
+<script src="../src/js/vo/PaintVO.js"></script>
+<script src="../src/js/vo/ScreenToneVO.js"></script>
+<script src="../src/js/vo/EraserVO.js"></script>
+<script src="../src/js/vo/ToolSettingVO.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    /**
+     *  PenVO 테스트
+     */
+
+    QUnit.test('PenVO size 기본값', function (assert) {
+        var vo = new nts.Painter.PenVO();
+        assert.equal(vo.getSize(), 1, '사이즈 기본값은 1입니다.');
+    });
+
+    QUnit.test('PenVO size 생성자 초기화', function (assert) {
+        var vo = new nts.Painter.PenVO(3);
+        assert.equal(vo.getSize(), 3, '생성자에서 사이즈를 초기화 할 수 있습니다.');
+    });
+
+    QUnit.test('PenVO size 최소값', function (assert) {
+        var vo = new nts.Painter.PenVO(-100);
+        assert.equal(vo.getSize(), 1, 'size 는 1보다 작을 수 없습니다.');
+    });
+
+    QUnit.test('PenVO size 최대값', function (assert) {
+        var vo = new nts.Painter.PenVO();
+        vo.setSize(100);
+        assert.equal(vo.getSize(), 50, 'size 는 50을 넘을 수 없습니다.');
+    });
+
+    QUnit.test('PenVO alpha 기본값', function (assert) {
+        var vo = new nts.Painter.PenVO();
+        assert.equal(vo.getAlpha(), 1, '사이즈 기본값은 1입니다.');
+    });
+
+    QUnit.test('PenVO alpha 생성자 초기화', function (assert) {
+        var vo = new nts.Painter.PenVO(1, 0.5);
+        assert.equal(vo.getAlpha(), 0.5, '생성자에서 사이즈를 초기화 할 수 있습니다.');
+    });
+
+    QUnit.test('PenVO alpha 최소값', function (assert) {
+        var vo = new nts.Painter.PenVO(1, -100);
+        assert.equal(vo.getAlpha(), 0, 'alpha 는 0보다 작을 수 없습니다.');
+    });
+
+    QUnit.test('PenVO alpha 최대값', function (assert) {
+        var vo = new nts.Painter.PenVO();
+        vo.setAlpha(100);
+        assert.equal(vo.getAlpha(), 1, 'alpha 는 1을 넘을 수 없습니다.');
+    });
+
+    QUnit.test('PenVO.toString()', function (assert) {
+        var size = 30;
+        var alpha = 0.2;
+        var vo = new nts.Painter.PenVO(size, alpha);
+
+        console.log(vo.toString());
+        assert.equal(vo.toString(), '[PenVO] size: ' + size + ' alpha: ' + alpha, 'toString() 테스트');
+    });
+
+
+    /**
+     *  PaintVO 테스트
+     */
+
+    QUnit.test('PaintVO alpha 기본값', function (assert) {
+        var vo = new nts.Painter.PaintVO();
+        assert.equal(vo.getAlpha(), 1, '알파 기본값은 1입니다.');
+    });
+
+    QUnit.test('PaintVO alpha 생성자 초기화', function (assert) {
+        var vo = new nts.Painter.PaintVO(0.5);
+        assert.equal(vo.getAlpha(), 0.5, '생성자에서 사이즈를 초기화 할 수 있습니다.');
+    });
+
+    QUnit.test('PaintVO alpha 최소값', function (assert) {
+        var vo = new nts.Painter.PaintVO(-100);
+        assert.equal(vo.getAlpha(), 0, 'alpha 는 0보다 작을 수 없습니다.');
+    });
+
+    QUnit.test('PaintVO alpha 최대값', function (assert) {
+        var vo = new nts.Painter.PaintVO();
+        vo.setAlpha(100);
+        assert.equal(vo.getAlpha(), 1, 'alpha 는 1을 넘을 수 없습니다.');
+    });
+
+    QUnit.test('PaintVO.toString()', function (assert) {
+        var alpha = 0.1;
+        var vo = new nts.Painter.PaintVO();
+        vo.setAlpha(alpha);
+
+        console.log(vo.toString());
+        assert.equal(vo.toString(), '[PaintVO] alpha: ' + alpha, 'toString() 테스트');
+    });
+
+
+    /**
+     *  ScreenToneVO 테스트
+     */
+
+    QUnit.test('ScreenToneVO type 기본값', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO();
+        assert.equal(vo.selectedType, null, '스크린톤 선택 타입 기본값은 null 입니다.');
+    });
+
+    QUnit.test('ScreenToneVO size 기본값', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO();
+        assert.equal(vo.getSize(), 1, '사이즈 기본값은 1입니다.');
+    });
+
+    QUnit.test('ScreenToneVO size 생성자 초기화', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1, 3, 1);
+        assert.equal(vo.getSize(), 3, '생성자에서 사이즈를 초기화 할 수 있습니다.');
+    });
+
+    QUnit.test('ScreenToneVO size 최소값', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1, -100);
+        assert.equal(vo.getSize(), 1, 'size 는 1보다 작을 수 없습니다.');
+    });
+
+    QUnit.test('ScreenToneVO size 최대값', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO();
+        vo.setSize(100);
+        assert.equal(vo.getSize(), 50, 'size 는 50을 넘을 수 없습니다.');
+    });
+
+    QUnit.test('ScreenToneVO alpha 기본값', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO();
+        assert.equal(vo.getAlpha(), 1, '사이즈 기본값은 1입니다.');
+    });
+
+    QUnit.test('ScreenToneVO alpha 생성자 초기화', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1, 1, 0.5);
+        assert.equal(vo.getAlpha(), 0.5, '생성자에서 사이즈를 초기화 할 수 있습니다.');
+    });
+
+    QUnit.test('ScreenToneVO alpha 최소값', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1, 1, -100);
+        assert.equal(vo.getAlpha(), 0, 'alpha 는 0보다 작을 수 없습니다.');
+    });
+
+    QUnit.test('ScreenToneVO alpha 최대값', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO();
+        vo.setAlpha(100);
+        assert.equal(vo.getAlpha(), 1, 'alpha 는 1을 넘을 수 없습니다.');
+    });
+
+    QUnit.test('ScreenToneVO Const type 설정 확인(1)', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1);
+
+        assert.equal(vo.getSelectedType(), nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1, 'type Const 값 확인합니다');
+    });
+
+    QUnit.test('ScreenToneVO Const type 설정 확인(2)', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO();
+        vo.setSelectedType(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_2);
+        assert.equal(vo.getSelectedType(), nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_2, 'type Const 값 확인합니다');
+    });
+
+    QUnit.test('ScreenToneVO Const type 설정 확인(3)', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_3);
+
+        assert.equal(vo.getSelectedType(), nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_3, 'type Const 값 확인합니다');
+    });
+
+    QUnit.test('ScreenToneVO Const type 설정 확인(4)', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO();
+        vo.setSelectedType(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_4);
+
+        assert.equal(vo.getSelectedType(), nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_4, 'type Const 값 확인합니다');
+    });
+
+    QUnit.test('ScreenToneVO Const type 설정 확인(5)', function (assert) {
+        var vo = new nts.Painter.ScreenToneVO(nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_5);
+
+        assert.equal(vo.getSelectedType(), nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_5, 'type Const 값 확인합니다');
+    });
+
+    QUnit.test('ScreenToneVO.toString()', function (assert) {
+        var type = nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1;
+        var size = 20;
+        var alpha = 0.8;
+
+        var vo = new nts.Painter.ScreenToneVO(type, size, alpha);
+        console.log(vo.toString());
+        assert.equal(vo.toString(),
+                '[ScreenToneVO] selectedType: ' + type +
+                ' size: ' + size + ' alpha: ' + alpha);
+    });
+
+
+    /**
+     *  EraserVO 테스트
+     */
+
+    QUnit.test('EraserVO size 기본값', function (assert) {
+        var vo = new nts.Painter.EraserVO();
+        console.dir(vo);
+        assert.equal(vo.getSize(), 1, '사이즈 기본값은 1입니다.');
+    });
+
+    QUnit.test('EraserVO size 생성자 초기화', function (assert) {
+        var vo = new nts.Painter.EraserVO(3);
+        assert.equal(vo.getSize(), 3, '생성자에서 사이즈를 초기화 할 수 있습니다.');
+    });
+
+    QUnit.test('EraserVO size 최소값', function (assert) {
+        var vo = new nts.Painter.EraserVO(-100);
+        assert.equal(vo.getSize(), 1, 'size 는 1보다 작을 수 없습니다.');
+    });
+
+    QUnit.test('EraserVO size 최대값', function (assert) {
+        var vo = new nts.Painter.EraserVO();
+        vo.setSize(100);
+        assert.equal(vo.getSize(), 50, 'size 는 50을 넘을 수 없습니다.');
+    });
+
+    QUnit.test('EraserVO.toString()', function (assert) {
+        var size = 20;
+        var vo = new nts.Painter.EraserVO(size);
+        console.log(vo.toString());
+        assert.equal(vo.toString(),
+                '[EraserVO] size: ' + size);
+    });
+
+
+    /**
+     *  ToolSettingVO 테스트
+     */
+
+    QUnit.test('ToolSettingVO 기본값', function (assert) {
+        var vo = new nts.Painter.ToolSettingVO();
+        assert.equal(vo.penVO, null, '기본 생성값은 null 입니다.');
+        assert.equal(vo.paintVO, null, '기본 생성값은 null 입니다.');
+        assert.equal(vo.screenToneVO, null, '기본 생성값은 null 입니다.');
+        assert.equal(vo.eraserVO, null, '기본 생성값은 null 입니다.');
+    });
+
+    QUnit.test('EraserVO.toString()', function (assert) {
+
+        var type = nts.Painter.ScreenToneVO.SCREEN_TONE_TYPE_1;
+        var size = 20;
+        var alpha = 0.9999;
+
+        var penVO = new nts.Painter.PenVO(size, alpha);
+        var paintVO = new nts.Painter.PaintVO(alpha);
+        var screenToneVO = new nts.Painter.ScreenToneVO(type, size, alpha);
+        var eraserVO = new nts.Painter.EraserVO(size);
+
+        var toolSettingVO = new nts.Painter.ToolSettingVO(penVO, paintVO, screenToneVO, eraserVO);
+
+        console.log(toolSettingVO.toString());
+        assert.equal(toolSettingVO.toString(),
+                '[ToolSettingVO]' + '\n' +
+                penVO.toString() + '\n' +
+                paintVO.toString() + '\n' +
+                screenToneVO.toString() + '\n' +
+                eraserVO.toString());
+    });
+
+
+</script>
+</body>
+</html>

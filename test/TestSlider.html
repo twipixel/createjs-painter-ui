@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Slider 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="790" height="615" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/controls/Slider.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+    queue.loadManifest(lib.properties.manifest);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var slider;
+    var eventListener;
+
+
+    function handleLoadComplete() {
+        console.log('[[handleLoadComplete]]');
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        slider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
+        slider.x = 20;
+        slider.y = 20;
+        stage.addChild(slider);
+
+        startTest();
+        stage.update();
+    }
+
+    function startTest() {
+        console.log('[[startTest]]', slider);
+
+        QUnit.test('Slider value 기본값', function (assert) {
+            assert.equal(slider.getValue(), 0, 'value 기본값은 0입니다.');
+        });
+
+        QUnit.test('Slider minValue 기본값', function (assert) {
+            assert.equal(slider.getMinValue(), 0, 'minValue 기본값은 0입니다.');
+        });
+
+        QUnit.test('Slider maxValue 기본값', function (assert) {
+            assert.equal(slider.getMaxValue(), 0, 'maxValue 기본값은 0입니다.');
+        });
+
+        QUnit.test('Slider maxValue 양수 설정', function (assert) {
+            slider.setMaxValue(100);
+            assert.equal(slider.getMaxValue(), 100, 'maxValue 양수 설정이 가능합니다.');
+
+            testSliderClick();
+        });
+
+        function testSliderClick() {
+            QUnit.test('Slider 드레그 테스트', function (assert) {
+                var guideText = '슬라이더를 드래그 하세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+                var changeCount = 0;
+
+                console.log('value: ' + slider.getValue(), ', minValue: ' + slider.getMinValue(), ', maxValue: ' + slider.getMaxValue());
+
+                eventListener = slider.on('sliderChange', function () {
+                    console.log('value', slider.getValue(), 'slider.getValue()', slider.getValue());
+
+                    changeCount = changeCount + 1;
+                    console.log('*** changeCount:', changeCount);
+
+                    if (changeCount == 10) {
+                        assert.equal(slider.getValue(), slider.getValue(), '슬라이더 초기 설정 시 CursorX 값이 \n0/0 = NaN 이 나오면 슬라이더가 안 움직입니다.\n 슬라이드가 가능한지 테스트 합니다.');
+                        done();
+                        slider.off('sliderChange', eventListener);
+                        stage.removeChild(guideTextField);
+
+                        setTimeout(testNextStep, 500);
+                    }
+                })
+            });
+        }
+
+        function testNextStep() {
+            QUnit.test('Slider minValue 음수 설정', function (assert) {
+                slider.setMinValue(-250);
+                assert.equal(slider.getMinValue(), -250, 'minValue 음수 설정이 가능합니다.');
+            });
+
+            QUnit.test('Slider minValue 양수 설정', function (assert) {
+                slider.setMinValue(250);
+                assert.equal(slider.getMinValue(), 250, 'minValue 양수 설정이 가능합니다.');
+            });
+
+            QUnit.test('Slider maxValue 음수 설정', function (assert) {
+                slider.setMaxValue(-100);
+                assert.equal(slider.getMaxValue(), -100, 'maxValue 음수 설정이 가능합니다.');
+            });
+
+            QUnit.test('Slider value 최저값 설정 테스트', function (assert) {
+                slider.setValue(-200);
+                var minValue = Math.min(slider.getMinValue(), slider.getMaxValue());
+                console.log('value:', slider.getValue(), 'minValue', minValue);
+                assert.equal(slider.getValue(), minValue, 'value 는 최대/최소 값을 벗어날 수 없습니다.');
+            });
+
+            QUnit.test('Slider value 최대값 설정 테스트', function (assert) {
+                slider.setValue(500);
+                var maxValue = Math.max(slider.getMinValue(), slider.getMaxValue());
+                console.log('value:', slider.getValue(), 'maxValue', maxValue);
+                assert.equal(slider.getValue(), maxValue, 'value 는 최대/최소 값을 벗어날 수 없습니다.');
+            });
+
+            QUnit.test('Slider value 설정 테스트', function (assert) {
+                var minValue = Math.min(slider.getMinValue(), slider.getMaxValue());
+                var maxValue = Math.max(slider.getMinValue(), slider.getMaxValue());
+                var halfValue = parseInt((minValue + maxValue) / 2);
+                slider.setValue(halfValue);
+                console.log('minValue:', minValue, 'maxValue:', maxValue, 'halfValue:', halfValue, 'value:', slider.getValue());
+                assert.equal(slider.getValue(), halfValue, 'value 가운데 값을 설정합니다.');
+            });
+
+            QUnit.test('Slider 최소값 확인 (맨 왼쪽 이동)', function (assert) {
+                var guideText = '슬라이더를 맨 왼쪽으로 이동 시키세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+
+                eventListener = stage.on('stagemouseup', function () {
+                    console.log('value:', slider.getValue(), 'minValue', slider.getMinValue());
+                    assert.equal(slider.getValue(), slider.getMinValue(), '슬라이더 시작점 이동 시 value 는 minValue 여야 합니다.');
+                    done();
+
+                    stage.off('stagemouseup', eventListener);
+                    stage.removeChild(guideTextField);
+
+                    testSlideRight();
+                })
+            });
+        }
+
+        function testSlideRight() {
+            QUnit.test('Slider 최대값 확인 ( 맨오른쪽 이동)', function (assert) {
+                var guideText = '슬라이더를 맨 오른쪽으로 이동 시키세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+
+                eventListener = stage.on('stagemouseup', function () {
+                    console.log('value', slider.getValue(), 'maxValue', slider.getMaxValue());
+                    assert.equal(slider.getValue(), slider.getMaxValue(), '슬라이더 종료점 이동 시 value 는 maxValue 여야 합니다.');
+                    done();
+
+                    stage.off('stagemouseup', eventListener);
+                    stage.removeChild(guideTextField);
+
+                    testSliderDown();
+                })
+            });
+        }
+
+        function testSliderDown() {
+            QUnit.test('sliderDown 이벤트 발생 테스트', function (assert) {
+                var guideText = '슬라이더 손잡이를 클릭 하세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+
+                eventListener = slider.on('sliderDown', function (event) {
+                    console.log('sliderDown', 'value', slider.getValue());
+                    assert.equal(slider.getValue(), slider.getValue(), 'sliderDown 이벤트가 오는지 확인 합니다.');
+                    done();
+
+                    slider.off('sliderDown', eventListener);
+                    stage.removeChild(guideTextField);
+
+                    setTimeout(testSliderUp, 300);
+                })
+            });
+        }
+
+        function testSliderUp() {
+            QUnit.test('sliderUp 이벤트 발생 테스트', function (assert) {
+                var guideText = '슬라이더 손잡이를 클릭 하세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+
+                eventListener = slider.on('sliderUp', function (event) {
+                    console.log('sliderUp', 'value', slider.getValue());
+                    assert.equal(slider.getValue(), slider.getValue(), 'sliderUp 이벤트가 오는지 확인 합니다.');
+                    done();
+
+                    slider.off('sliderUp', eventListener);
+                    stage.removeChild(guideTextField);
+
+                    testChangeCallbackAtDraggingFalse();
+                })
+            });
+        }
+
+        function testChangeCallbackAtDraggingFalse() {
+            QUnit.test('enableSliderChangeCallbackAtDragging 속성 false 테스트', function (assert) {
+                var guideText = '슬라이더 손잡이 드래그 후 마우스 업! 하세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+
+                slider.setEnableSliderChangeCallbackAtDragging(false);
+
+                eventListener = slider.on('sliderChange', function (event) {
+                    console.log('sliderChange', 'value', slider.getValue());
+                    assert.equal(slider.getValue(), slider.getValue(), '마우스 업 시 sliderChange 이벤트가 오는지 확인 합니다.');
+                    done();
+
+                    slider.off('sliderChange', eventListener);
+                    stage.removeChild(guideTextField);
+
+                    testChangeCallbackAtDraggingTrue();
+                })
+            });
+        }
+
+        function testChangeCallbackAtDraggingTrue() {
+            QUnit.test('enableSliderChangeCallbackAtDragging 속성 true 테스트', function (assert) {
+                var guideText = '슬라이더 손잡이를 드래그 하세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+
+                var changeCount = 0;
+                slider.setEnableSliderChangeCallbackAtDragging(true);
+
+                eventListener = slider.on('sliderChange', function () {
+                    console.log('sliderChange', 'value', slider.getValue(), ', minValue: ' + slider.getMinValue() + ', maxValue: ' + slider.getMaxValue());
+                    assert.equal(slider.getValue(), slider.getValue(), '마우스 이동 시 sliderChange 이벤트가 오는지 확인 합니다.');
+
+                    changeCount = changeCount + 1;
+
+                    if (changeCount == 10) {
+                        done();
+                        //slider.off('sliderChange', eventListener);
+                        stage.removeChild(guideTextField);
+                    }
+                })
+            });
+        }
+
+
+    }
+
+</script>
+</body>
+</html>

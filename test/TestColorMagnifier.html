@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ColorMagnifier 테스트</title>
+    <link rel="stylesheet" href="./qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="content">
+    <canvas id="canvas" width="500" height="240" style="background-color:#FFFFFF"></canvas>
+</div>
+<div id="colorField">
+    <canvas id="input" width="350" height="50" style="background-color:#FFFFFF"></canvas>
+</div>
+<script src="./qunitjs/qunit/qunit.js"></script>
+<script src="../vendor/easeljs-0.8.1.combined.js"></script>
+<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
+<script src="../vendor/movieclip-0.8.1.combined.js"></script>
+<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+<script src="../vendor/CanvasInput.js"></script>
+
+<!-- Namespace -->
+<script src="../src/js/namespace.js"></script>
+
+<script src="assets/Assets.js"></script>
+<script src="../src/js/utils/SpriteSheetUtil.js"></script>
+<script src="../src/js/controls/Slider.js"></script>
+<script src="../src/js/controls/ColorMagnifier.js"></script>
+<script>
+
+    // Qunit Cookbook
+    // https://qunitjs.com/cookbook/
+    // ok( truthy [, message ] )
+    // equal( actual, expected [, message ] )
+    // deepEqual( actual, expected [, message ] )
+
+    var c = createjs;
+    var stage = new c.Stage('canvas');
+
+    ss = ss || {};
+    images = images || {};
+
+    var queue = new c.LoadQueue();
+    queue.on('fileload', handleFileLoad, this);
+    queue.on('complete', handleLoadComplete, this, true);
+
+    // let it handle multiple loads concurrently:
+    queue.setMaxConnections(8);
+
+    // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
+    queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
+
+
+    function handleFileLoad(evt) {
+        var o = evt.item;
+
+        if (evt.item.type == 'image') {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    var input = new CanvasInput({
+        canvas: document.getElementById('input'),
+        fontSize: 18,
+        fontFamily: 'Arial',
+        fontColor: '#212121',
+        fontWeight: 'bold',
+        width: 140,
+        padding: 8,
+        borderWidth: 1,
+        borderColor: '#000',
+        borderRadius: 3,
+        boxShadow: '1px 1px 0px #fff',
+        innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
+        placeHolder: '#000000, Black'
+    });
+
+    var penSizeSlider;
+    var penAlphaSlider;
+    var colorMagnifier;
+
+    var showButton;
+    var hideButton;
+
+    var isDoneSizeTest = false;
+    var isDoneAlphaTest = false;
+
+    function handleLoadComplete() {
+        console.log('[[handleLoadComplete]]');
+        ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
+        queue = null;
+
+        colorMagnifier = new nts.Painter.ColorMagnifier(1, 1, '#68b9b8', lib.ColorMagnifier);
+        colorMagnifier.x = 30;
+        colorMagnifier.y = 30;
+        stage.addChild(colorMagnifier);
+
+        penSizeSlider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
+        penSizeSlider.setMinValue(0);
+        penSizeSlider.setMaxValue(colorMagnifier.width);
+        penSizeSlider.x = 24;
+        penSizeSlider.y = colorMagnifier.y + colorMagnifier.height + 20;
+        stage.addChild(penSizeSlider);
+
+        console.log(colorMagnifier.y, colorMagnifier.height);
+
+        penAlphaSlider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
+        penAlphaSlider.setMinValue(0);
+        penAlphaSlider.setMaxValue(1);
+        penAlphaSlider.x = 24;
+        penAlphaSlider.y = colorMagnifier.y + colorMagnifier.height + 50;
+        stage.addChild(penAlphaSlider);
+
+        startTest();
+        stage.update();
+    }
+
+    function startTest() {
+        console.log('[[startTest]]', colorMagnifier);
+
+        QUnit.test('PenSizeDisplayer penSize 기본값', function (assert) {
+            assert.equal(colorMagnifier.getSize(), 1, 'penSize 기본값은 1입니다.');
+        });
+
+        QUnit.test('PenSizeDisplayer penSize 최대값 테스트', function (assert) {
+            colorMagnifier.setSize(200);
+            assert.equal(colorMagnifier.getSize(), colorMagnifier.width, 'penSize 최대값은 colorMagnifier.width 입니다..');
+        });
+
+        QUnit.test('PenSizeDisplayer penSize 최소값 테스트', function (assert) {
+            colorMagnifier.setSize(-20);
+            assert.equal(colorMagnifier.getSize(), 1, 'penSize 최소값은 1입니다.');
+        });
+
+        QUnit.test('PenSizeDisplayer penAlpha 기본값', function (assert) {
+            assert.equal(colorMagnifier.getAlpha(), 1, 'penSize 기본값은 1입니다.');
+        });
+
+        QUnit.test('PenSizeDisplayer penAlpha 최소값 테스트', function (assert) {
+            colorMagnifier.setAlpha(-20);
+            assert.equal(colorMagnifier.getAlpha(), 0, 'penAlpha 최소값은 0입니다.');
+        });
+
+        QUnit.test('PenSizeDisplayer penAlpha 최대값 테스트', function (assert) {
+            colorMagnifier.setAlpha(200);
+            assert.equal(colorMagnifier.getAlpha(), 1, 'penAlpha 최대값은 1입니다..');
+        });
+
+        QUnit.test('PenSizeDisplayer penColor 기본값 테스트', function (assert) {
+            assert.equal(colorMagnifier.getColor(), '#000000', 'penColor 기본값은 #000000입니다..');
+
+            testColor();
+        });
+
+
+        showButton = getButton();
+        showButton.x = colorMagnifier.width + 40;
+        showButton.y = 40;
+
+        showButton.on('click', function () {
+            colorMagnifier.show();
+        });
+
+        hideButton = getButton();
+        hideButton.x = colorMagnifier.width + 40;
+        hideButton.y = 90;
+
+        hideButton.on('click', function(){
+            colorMagnifier.hide();
+        });
+
+
+        function testColor() {
+            QUnit.test('색상 값 테스트', function (assert) {
+                var guideText = '색상 값을 입력하고 Enter 를 누르세요.';
+                console.log(guideText);
+                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                stage.addChild(guideTextField);
+                stage.update();
+
+                var done = assert.async();
+
+
+                penSizeSlider.setValue(92);
+                penAlphaSlider.setValue(1);
+                colorMagnifier.setSize(92);
+                colorMagnifier.setAlpha(1);
+
+
+                input.onsubmit(function () {
+                    colorMagnifier.setPenColor(input.value());
+                    console.log('input.value()', input.value());
+                })
+
+                penSizeSlider.on('sliderChange', function () {
+                    colorMagnifier.setSize(penSizeSlider.getValue());
+                });
+
+                penAlphaSlider.on('sliderChange', function () {
+                    colorMagnifier.setAlpha(penAlphaSlider.getValue());
+                });
+            });
+        }
+
+
+        function getButton() {
+            var btn = new c.Shape();
+            var btnWidth = 80;
+            var btnHeight = 40;
+            btn.graphics
+                //.setStrokeStyle(1)
+                //.beginStroke('red')
+                    .beginFill('orange')
+                    .drawRoundRect(0, 0, btnWidth, btnHeight, 4)
+                    .endFill();
+            btn.x = 20;
+            btn.y = 10;
+            stage.addChild(btn);
+            stage.update();
+            return btn;
+        }
+
+    }
+
+</script>
+</body>
+</html>
