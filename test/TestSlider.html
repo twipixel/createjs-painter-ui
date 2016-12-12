@@ -59,6 +59,8 @@
 
     var slider;
     var eventListener;
+    var guideTextSize = '24px';
+    var guideTextColor = '#e67e22';
 
 
     function handleLoadComplete() {
@@ -101,7 +103,7 @@
             QUnit.test('Slider 드레그 테스트', function (assert) {
                 var guideText = '슬라이더를 드래그 하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, guideTextSize, guideTextColor);
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -116,7 +118,7 @@
                     changeCount = changeCount + 1;
                     console.log('*** changeCount:', changeCount);
 
-                    if (changeCount == 10) {
+                    if (changeCount >= 60) {
                         assert.equal(slider.getValue(), slider.getValue(), '슬라이더 초기 설정 시 CursorX 값이 \n0/0 = NaN 이 나오면 슬라이더가 안 움직입니다.\n 슬라이드가 가능한지 테스트 합니다.');
                         done();
                         slider.off('sliderChange', eventListener);
@@ -170,19 +172,23 @@
             QUnit.test('Slider 최소값 확인 (맨 왼쪽 이동)', function (assert) {
                 var guideText = '슬라이더를 맨 왼쪽으로 이동 시키세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, guideTextSize, guideTextColor);
                 stage.addChild(guideTextField);
                 stage.update();
 
                 var done = assert.async();
 
-                eventListener = stage.on('stagemouseup', function () {
+                eventListener = slider.on('mousemove', function () {
                     console.log('value:', slider.getValue(), 'minValue', slider.getMinValue());
                     assert.equal(slider.getValue(), slider.getMinValue(), '슬라이더 시작점 이동 시 value 는 minValue 여야 합니다.');
-                    done();
 
-                    stage.off('stagemouseup', eventListener);
-                    stage.removeChild(guideTextField);
+                    if(slider.getValue() == slider.getMinValue()) {
+                        done();
+                        slider.off('mousemove', eventListener);
+                        stage.removeChild(guideTextField);
+                    } else {
+                        assert.equal(slider.getValue(), slider.getMinValue(), '슬라이더 시작점 이동 시 value 는 minValue 여야 합니다.');
+                    }
 
                     testSlideRight();
                 })
@@ -193,7 +199,7 @@
             QUnit.test('Slider 최대값 확인 ( 맨오른쪽 이동)', function (assert) {
                 var guideText = '슬라이더를 맨 오른쪽으로 이동 시키세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, guideTextSize, guideTextColor);
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -216,7 +222,7 @@
             QUnit.test('sliderDown 이벤트 발생 테스트', function (assert) {
                 var guideText = '슬라이더 손잡이를 클릭 하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, guideTextSize, guideTextColor);
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -239,7 +245,7 @@
             QUnit.test('sliderUp 이벤트 발생 테스트', function (assert) {
                 var guideText = '슬라이더 손잡이를 클릭 하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, guideTextSize, guideTextColor);
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -262,7 +268,7 @@
             QUnit.test('enableSliderChangeCallbackAtDragging 속성 false 테스트', function (assert) {
                 var guideText = '슬라이더 손잡이 드래그 후 마우스 업! 하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, guideTextSize, guideTextColor);
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -287,7 +293,7 @@
             QUnit.test('enableSliderChangeCallbackAtDragging 속성 true 테스트', function (assert) {
                 var guideText = '슬라이더 손잡이를 드래그 하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, guideTextSize, guideTextColor);
                 stage.addChild(guideTextField);
                 stage.update();
 
