@@ -9,10 +9,10 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <div id="button">
-    <canvas id="buttonCanvas" width="500" height="60" style="background-color:#FFFFFF"></canvas>
+    <canvas id="buttonCanvas" width="360" height="60" style="background-color:#FFFFFF"></canvas>
 </div>
 <div id="content">
-    <canvas id="canvas" width="500" height="200" style="background-color:#FFFFFF"></canvas>
+    <canvas id="canvas" width="360" height="240" style="background-color:#FFFFFF"></canvas>
 </div>
 
 <!-- QUnit -->
@@ -89,6 +89,8 @@
         }
     }
 
+    var offsetX = 20;
+    var offsetY = 24;
     var eventListener;
     var toolSettingPanel;
 
@@ -97,8 +99,8 @@
         queue = null;
 
         toolSettingPanel = new nts.Painter.ToolSettingPanel(nts.Painter.CONSTANT.TOOL_TYPE_PEN);
-        toolSettingPanel.x = 20;
-        toolSettingPanel.y = 20;
+        toolSettingPanel.x = offsetX;
+        toolSettingPanel.y = offsetY;
         stage.addChild(toolSettingPanel);
         stage.update();
 
@@ -116,7 +118,7 @@
     function testPenSizeVO() {
         QUnit.test('PenVO.size 변경/설정 테스트', function (assert) {
 
-            var guideTextField = createGuideText('사이즈를 변경하세요.');
+            var guideTextField = getText('사이즈를 변경하세요.');
             var done = assert.async();
 
             eventListener = stage.on('stagemouseup', function () {
@@ -139,7 +141,7 @@
     function testPenAlphaVO() {
         QUnit.test('PenVO.alpha 변경/설정 테스트', function (assert) {
 
-            var guideTextField = createGuideText('투명도를 변경하세요.');
+            var guideTextField = getText('투명도를 변경하세요.');
             var done = assert.async();
 
             eventListener = stage.on('stagemouseup', function (event) {
@@ -162,8 +164,8 @@
     function testPaintSetting() {
         QUnit.test('Paint 로 설정', function (assert) {
 
-            var btn = createButton();
-            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(페인트 설정으로 변경)');
+            var btn = getButton();
+            var guideTextField = getText('상단 버튼을 클릭 하세요.(페인트 설정으로 변경)');
             var done = assert.async();
 
             eventListener = btn.on('click', function () {
@@ -176,6 +178,7 @@
                 stage.removeChild(guideTextField);
                 buttonStage.removeChild(btn);
                 stage.update();
+                buttonStage.update();
                 setTimeout(testPaintAlphaVO, 500);
             })
         });
@@ -184,7 +187,7 @@
     function testPaintAlphaVO() {
         QUnit.test('PaintVO.alpha 변경/설정 테스트', function (assert) {
 
-            var guideTextField = createGuideText('투명도를 변경하세요.');
+            var guideTextField = getText('투명도를 변경하세요.');
             var done = assert.async();
 
             eventListener = stage.on('stagemouseup', function () {
@@ -199,6 +202,7 @@
                 stage.off('stagemouseup', eventListener);
                 stage.removeChild(guideTextField);
                 stage.update();
+                buttonStage.update();
                 setTimeout(testScreenToneSetting, 500);
             })
         });
@@ -207,8 +211,8 @@
     function testScreenToneSetting() {
         QUnit.test('ScreenTone 으로 설정', function (assert) {
 
-            var btn = createButton();
-            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(스크린톤 설정으로 변경)');
+            var btn = getButton();
+            var guideTextField = getText('상단 버튼을 클릭 하세요.(스크린톤 설정으로 변경)');
             var done = assert.async();
 
             eventListener = btn.on('click', function () {
@@ -221,15 +225,44 @@
                 stage.removeChild(guideTextField);
                 buttonStage.removeChild(btn);
                 stage.update();
-                setTimeout(testScreenToneSizeVO, 500);
+                buttonStage.update();
+                setTimeout(testScreenToneType, 500);
             })
+        });
+    }
+
+    function testScreenToneType() {
+        QUnit.test('ScreenToneType 변경 테스트', function (assert) {
+
+            var guideTextField = getText('스크린톤을 선택하세요. (타입)');
+            var done = assert.async();
+
+            var delay = function () {
+                assert.equal(
+                        toolSettingPanel.getVO().screenToneVO.getSelectedType(),
+                        toolSettingPanel.getSelectedScreenToneType(),
+                        '선택한 스크린톤 타입과 getVO의 값이 동일한지 확인합니다.');
+                console.log('toolSettingPanel.getSelectedScreenToneType() : ', toolSettingPanel.getSelectedScreenToneType());
+                console.log('toolSettingPanel.getVO().screenToneVO.getSelectedType() : ', toolSettingPanel.getVO().screenToneVO.getSelectedType());
+                done();
+
+                stage.off('stagemouseup', eventListener);
+                stage.removeChild(guideTextField);
+                stage.update();
+                buttonStage.update();
+                setTimeout(testScreenToneSizeVO, 500);
+            };
+
+            eventListener = stage.on('stagemouseup', function() {
+                setTimeout(delay, 10);
+            });
         });
     }
 
     function testScreenToneSizeVO() {
         QUnit.test('ScreenToneVO.size 변경/설정 테스트', function (assert) {
 
-            var guideTextField = createGuideText('사이즈를 변경하세요.');
+            var guideTextField = getText('사이즈를 변경하세요.');
             var done = assert.async();
 
             eventListener = stage.on('stagemouseup', function () {
@@ -245,6 +278,7 @@
                 stage.off('stagemouseup', eventListener);
                 stage.removeChild(guideTextField);
                 stage.update();
+                buttonStage.update();
                 setTimeout(testScreenToneAlphaVO, 500);
             })
         });
@@ -253,7 +287,7 @@
     function testScreenToneAlphaVO() {
         QUnit.test('ScreenToneVO.alpha 변경/설정 테스트', function (assert) {
 
-            var guideTextField = createGuideText('투명도를 변경하세요.');
+            var guideTextField = getText('투명도를 변경하세요.');
             var done = assert.async();
 
             eventListener = stage.on('stagemouseup', function (event) {
@@ -268,6 +302,7 @@
                 stage.off('stagemouseup', eventListener);
                 stage.removeChild(guideTextField);
                 stage.update();
+                buttonStage.update();
                 setTimeout(testEraserSetting, 500);
             })
         });
@@ -276,8 +311,8 @@
     function testEraserSetting() {
         QUnit.test('Eraser 로 설정', function (assert) {
 
-            var btn = createButton();
-            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(지우게 설정으로 변경)');
+            var btn = getButton();
+            var guideTextField = getText('상단 버튼을 클릭 하세요.(지우게 설정으로 변경)');
             var done = assert.async();
 
             eventListener = btn.on('click', function () {
@@ -290,6 +325,7 @@
                 stage.removeChild(guideTextField);
                 buttonStage.removeChild(btn);
                 stage.update();
+                buttonStage.update();
                 setTimeout(testEraserSizeVO, 500);
             })
         });
@@ -298,7 +334,7 @@
     function testEraserSizeVO() {
         QUnit.test('EraserVO.size 변경/설정 테스트', function (assert) {
 
-            var guideTextField = createGuideText('사이즈를 변경하세요.');
+            var guideTextField = getText('사이즈를 변경하세요.');
             var done = assert.async();
 
             eventListener = stage.on('stagemouseup', function () {
@@ -322,8 +358,8 @@
     function testColorSetting() {
         QUnit.test('색상 변경', function (assert) {
 
-            var btn = createButton();
-            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(색상 변경)');
+            var btn = getButton();
+            var guideTextField = getText('상단 버튼을 클릭 하세요.(색상 변경)');
             var done = assert.async();
 
             eventListener = btn.on('click', function () {
@@ -336,50 +372,48 @@
                 stage.removeChild(guideTextField);
                 //buttonStage.removeChild(btn);
                 stage.update();
+                buttonStage.update();
 
                 if(isTestDone === false)
-                    setTimeout(testNext, 500);
+                    setTimeout(testComplete, 500);
             })
         });
     }
 
     var isTestDone = false;
-    function testNext() {
+    function testComplete() {
         QUnit.test('테스트 완료', function (assert) {
             assert.equal(0, 0, '테스트 완료');
 
-            var guideTextField = createGuideText('테스트 완료');
+            var guideTextField = getText('테스트 완료');
             stage.addChild(guideTextField);
             stage.update();
+            buttonStage.update();
 
             isTestDone = true;
         });
     }
 
-    function createGuideText(msg) {
+    function getText(msg) {
         var guideText = msg;
         console.log(guideText);
-        var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+        var guideTextField = new c.Text(guideText, '16px Arial', '#27AE60');
+        guideTextField.x = offsetX + 2;
         stage.addChild(guideTextField);
         stage.update();
         return guideTextField;
     }
 
-    function createButton() {
-        var btn = new c.Shape();
-        var btnWidth = 80;
-        var btnHeight = 40;
-        btn.graphics
-            //.setStrokeStyle(1)
-            //.beginStroke('red')
-                .beginFill('orange')
-                .drawRoundRect(0, 0, btnWidth, btnHeight, 4)
-                .endFill();
-        btn.x = 20;
-        btn.y = 10;
-        buttonStage.addChild(btn);
+    function getButton() {
+        var imageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAoCAYAAACYayaMAAAFKklEQVRoge2bbUyVVRzAf+fci6+QvMRQM8EgRW2hZEoQ+QJbyuZcLZqWLdnawA+ZTXM6t0ZflA+41LGCzUVz6ii0xgfJmg2MIN+YUBOoQMUP+AIKA0wQ7jl9uFyBy+XlIpcH772/7X445/zPc3/7779zz/M85wpGQ27YFMJnJyBFIrAMiMQknh3VtZ5GLLoJoa8Cl1H6LLW3ikm50eHsZYRT0WeXz2eqeQeId5HC39kvc1uUbkZznI5HX5J46dpIp40s+adfncmMSRkINiOFadSS7o7SFjS5NHfsYX1503Dhwyf/XNz7mMnyVroTKH0Pi07ljbJTQ4XJQUfSMfN7XBaTxDFv4p1EiiBM4iSlsZkkM+hK4bjyD0dM5pWQ75Big8sEPQWl8ii/u4VttZ32QwMrPx0z0SEnvIkfI6TcSHTINzjI9cDkJ8btxyTeHg8vj8Ek3qMk9nP77v7LTnHMOnxMhUjndqBeRoDSii4SWVVaZOvqrfyCBX74mI54E+8ipJD4cITv50x93PV4MChoN1LMNkTMU5DiBWbN3WFrWsv8zOJAfP1vYhLTDRPzFJRupqkplA1/t1kr39c/zZv4cUKKAAKDUsC27Ag+MFTInpmHaY4pQfd8mhcl946FH0NH7XH6krlRJVSHj6HjkyD5EMBMUexLSBFptE8/bm8j4LYzEyJIjUgnIzAUfwmoNmru57CxtoBK1xg+GVJG8/PyeWZMrDbapZc9VMckMVgltLQeJmDAfSKsjNhHtv99sq+nsLWxlqjgHWSH7uRM5CNm1fzkUuNRM920RiJFjNEevexn4ZV0stvu0dKnt6O7nrxryQRU5TuYs4TtfrOoaExja2MtAJWNB3jtzlX8fdeROi7eo0CLFRJYYLRHP2ankDb5JhnV8Yjz8YjzH5PWOomNz6WywhYzNcn6exCdaV08AeRMY3xHixQLzAjmGO3Rj4Z88nxT2L2whIyero7uevJu5nDBFvOwEFG5//GUG631nAlK5+v2zN5lJ2QxLe37yBlv/5Gied4M+Bnt0Y/OAjb9VQBAblQhYXeSWD3Mj++5up1sj8gkY14uaeEAbdTcz2btPxN0vbfiZwZ8jLaw8cmiQg4+Y1cLYSXoMFujnm8bHc28TU7t5olb5Y4Q+JiBNiDQaBeAQ1VJHBpBXIrLTcYBTasZTRMTJPlWkilato1V5sEjWlqzCag6PqA/N6qEmPZ4Fta5UG/suGsG6oD5Rpv0ks/qy462lD2EH0P7znX6qimV8U/g5AKE/lcCl4z28Ei0+NNMl6UIk3nAW5ankYquNrYEl6CDBwmw26IaSrcuFj0vyxuQYgKt+26O0g0cLJ0rrW/VdZ7RPh6F5gT5WKyPlLtVFkprg5U8A6UtPOj6CmzP81eer0YzxBbDy9ihj/LmxevQ9x1up96F0v8Z5uQJKN1KW+deW7M3+Qll9Wj2OpzkZWxQ+jPWlt+yNe3PiUhK437wnlZzAUrlEVe2qW+X/Yk1xd0HW1C6Yhy13B+lLlLX/pF9t+MTUoVLg5kxrRAplrlczN2x6As0PljLWxUt9kOOj4gnXWmkqWkNSp12uZw7Y9GnaGhJdJR4GP7PEZLfYndiEl8gxRQX6LknSj9Es4vXS7OGChvZwcxfVrzINPMBBOu9ZzmHQGnQ/Ein/pSEsvrhwp3LZFHsEnzEduAd7wm3PijdCvok3TqLlX9cGem00ZXx0ZenE+qXgNQJSLEUiESKwZ4luh9K3wFdg6IcVDFVXb+SWu70Der/oEOVMwWmoV0AAAAASUVORK5CYII=';
+        var imageObject = document.createElement('img');
+        imageObject.setAttribute('src', imageBase64);
+        var button = new c.Bitmap(imageObject);
+        button.x = offsetX + 2;
+        button.y = 50 / 2 - 20 / 2;
+        buttonStage.addChild(button);
         buttonStage.update();
-        return btn;
+        return button;
     }
 
 </script>

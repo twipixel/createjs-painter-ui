@@ -9,7 +9,7 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <div id="content">
-    <canvas id="canvas" width="790" height="615" style="background-color:#FFFFFF"></canvas>
+    <canvas id="canvas" width="360" height="220" style="background-color:#FFFFFF"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
 <script src="../vendor/easeljs-0.8.1.combined.js"></script>
@@ -60,6 +60,14 @@
     var slider;
     var eventListener;
 
+    var offsetX = 24;
+    var offsetY = 8;
+    var fontSize = '16px Arial';
+    var fontColor = '#27AE60';
+
+    var isDoneLeftMoveTest = false;
+    var isDoneRightMoveTest = false;
+
 
     function handleLoadComplete() {
         console.log('[[handleLoadComplete]]');
@@ -67,8 +75,8 @@
         queue = null;
 
         slider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
-        slider.x = 20;
-        slider.y = 20;
+        slider.x = offsetX;
+        slider.y = 54;
         stage.addChild(slider);
 
         startTest();
@@ -94,14 +102,16 @@
             slider.setMaxValue(100);
             assert.equal(slider.getMaxValue(), 100, 'maxValue 양수 설정이 가능합니다.');
 
-            testSliderClick();
+            testNextStep();
         });
 
-        function testSliderClick() {
+        /*function testSliderClick() {
             QUnit.test('Slider 드레그 테스트', function (assert) {
-                var guideText = '슬라이더를 드래그 하세요.';
+                var guideText = '슬라이더를 오른쪽 끝으로 이동하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = offsetY;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -111,22 +121,23 @@
                 console.log('value: ' + slider.getValue(), ', minValue: ' + slider.getMinValue(), ', maxValue: ' + slider.getMaxValue());
 
                 eventListener = slider.on('sliderChange', function () {
-                    console.log('value', slider.getValue(), 'slider.getValue()', slider.getValue());
+                    console.log('sliderChange', 'value', slider.getValue());
 
-                    changeCount = changeCount + 1;
-                    console.log('*** changeCount:', changeCount);
-
-                    if (changeCount == 10) {
-                        assert.equal(slider.getValue(), slider.getValue(), '슬라이더 초기 설정 시 CursorX 값이 \n0/0 = NaN 이 나오면 슬라이더가 안 움직입니다.\n 슬라이드가 가능한지 테스트 합니다.');
+                    if (slider.getValue() == slider.getMaxValue()) {
+                        if (isDoneRightMoveTest) return;
+                        assert.equal(slider.getValue(), slider.getMaxValue(), '슬라이더 변화 시 값을 확인합니다.');
                         done();
-                        slider.off('sliderChange', eventListener);
+
                         stage.removeChild(guideTextField);
+                        stage.update();
+
+                        isDoneRightMoveTest = true;
 
                         setTimeout(testNextStep, 500);
                     }
                 })
             });
-        }
+        }*/
 
         function testNextStep() {
             QUnit.test('Slider minValue 음수 설정', function (assert) {
@@ -167,56 +178,75 @@
                 assert.equal(slider.getValue(), halfValue, 'value 가운데 값을 설정합니다.');
             });
 
-            QUnit.test('Slider 최소값 확인 (맨 왼쪽 이동)', function (assert) {
-                var guideText = '슬라이더를 맨 왼쪽으로 이동 시키세요.';
+            QUnit.test('Slider 최소값 확인', function (assert) {
+                var guideText = '슬라이더를 왼쪽 끝으로 이동하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = offsetY;
                 stage.addChild(guideTextField);
                 stage.update();
 
                 var done = assert.async();
 
-                eventListener = stage.on('stagemouseup', function () {
-                    console.log('value:', slider.getValue(), 'minValue', slider.getMinValue());
-                    assert.equal(slider.getValue(), slider.getMinValue(), '슬라이더 시작점 이동 시 value 는 minValue 여야 합니다.');
-                    done();
+                eventListener = slider.on('sliderChange', function () {
+                    console.log('sliderChange', 'value', slider.getValue());
 
-                    stage.off('stagemouseup', eventListener);
-                    stage.removeChild(guideTextField);
+                    if (slider.getValue() == slider.getMinValue()) {
+                        if (isDoneLeftMoveTest) return;
+                        assert.equal(slider.getValue(), slider.getMinValue(), '슬라이더 시작점 이동 시 value 는 minValue 여야 합니다.');
+                        done();
 
-                    testSlideRight();
+                        slider.off('sliderChange', eventListener);
+                        stage.removeChild(guideTextField);
+                        stage.update();
+
+                        isDoneLeftMoveTest = true;
+                        setTimeout(testSlideRight, 500);
+                    }
                 })
             });
         }
 
         function testSlideRight() {
-            QUnit.test('Slider 최대값 확인 ( 맨오른쪽 이동)', function (assert) {
-                var guideText = '슬라이더를 맨 오른쪽으로 이동 시키세요.';
+            QUnit.test('Slider 최대값 확인', function (assert) {
+                var guideText = '슬라이더를 오른쪽 끝으로 이동하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = offsetY;
                 stage.addChild(guideTextField);
                 stage.update();
 
                 var done = assert.async();
 
-                eventListener = stage.on('stagemouseup', function () {
-                    console.log('value', slider.getValue(), 'maxValue', slider.getMaxValue());
-                    assert.equal(slider.getValue(), slider.getMaxValue(), '슬라이더 종료점 이동 시 value 는 maxValue 여야 합니다.');
-                    done();
+                eventListener = slider.on('sliderChange', function () {
+                    console.log('sliderChange', 'value', slider.getValue());
 
-                    stage.off('stagemouseup', eventListener);
-                    stage.removeChild(guideTextField);
+                    if (slider.getValue() == slider.getMaxValue()) {
+                        if (isDoneRightMoveTest) return;
 
-                    testSliderDown();
+                        assert.equal(slider.getValue(), slider.getMaxValue(), '슬라이더 종료점 이동 시 value 는 maxValue 여야 합니다.');
+                        done();
+
+                        slider.off('sliderChange', eventListener);
+                        stage.removeChild(guideTextField);
+                        stage.update();
+
+                        isDoneRightMoveTest = true;
+                        setTimeout(testSliderDown, 500);
+                    }
                 })
             });
         }
 
         function testSliderDown() {
             QUnit.test('sliderDown 이벤트 발생 테스트', function (assert) {
-                var guideText = '슬라이더 손잡이를 클릭 하세요.';
+                var guideText = '슬라이더 손잡이를 클릭 하세요. \n(SLIDER_DOWN 이벤트 테스트)';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = offsetY;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -229,6 +259,7 @@
 
                     slider.off('sliderDown', eventListener);
                     stage.removeChild(guideTextField);
+                    stage.update();
 
                     setTimeout(testSliderUp, 300);
                 })
@@ -237,9 +268,11 @@
 
         function testSliderUp() {
             QUnit.test('sliderUp 이벤트 발생 테스트', function (assert) {
-                var guideText = '슬라이더 손잡이를 클릭 하세요.';
+                var guideText = '슬라이더 손잡이를 클릭 하세요. \n(SLIDER_UP 이벤트 테스트)';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = offsetY;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -252,6 +285,7 @@
 
                     slider.off('sliderUp', eventListener);
                     stage.removeChild(guideTextField);
+                    stage.update();
 
                     testChangeCallbackAtDraggingFalse();
                 })
@@ -260,9 +294,11 @@
 
         function testChangeCallbackAtDraggingFalse() {
             QUnit.test('enableSliderChangeCallbackAtDragging 속성 false 테스트', function (assert) {
-                var guideText = '슬라이더 손잡이 드래그 후 마우스 업! 하세요.';
+                var guideText = '슬라이더 손잡이 드래그 후 마우스 업! 하세요. \n(SLIDER_CHANGE 이벤트 테스트)';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = offsetY;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -277,6 +313,7 @@
 
                     slider.off('sliderChange', eventListener);
                     stage.removeChild(guideTextField);
+                    stage.update();
 
                     testChangeCallbackAtDraggingTrue();
                 })
@@ -285,9 +322,11 @@
 
         function testChangeCallbackAtDraggingTrue() {
             QUnit.test('enableSliderChangeCallbackAtDragging 속성 true 테스트', function (assert) {
-                var guideText = '슬라이더 손잡이를 드래그 하세요.';
+                var guideText = '슬라이더 손잡이를 드래그 하세요. \n(enableSliderChangeCallbackAtDragging 테스트)';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = offsetY;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -300,18 +339,36 @@
                     console.log('sliderChange', 'value', slider.getValue(), ', minValue: ' + slider.getMinValue() + ', maxValue: ' + slider.getMaxValue());
                     assert.equal(slider.getValue(), slider.getValue(), '마우스 이동 시 sliderChange 이벤트가 오는지 확인 합니다.');
 
-                    changeCount = changeCount + 1;
-
-                    if (changeCount == 10) {
+                    if (changeCount++ == 24) {
                         done();
-                        //slider.off('sliderChange', eventListener);
+                        slider.off('sliderChange', eventListener);
                         stage.removeChild(guideTextField);
+                        stage.update();
+                        setTimeout(testComplete, 500);
                     }
                 })
             });
         }
 
 
+    }
+
+    var isTestDone = false;
+    function testComplete() {
+        if(isTestDone) return;
+        QUnit.test('테스트 완료', function (assert) {
+            var guideText = '테스트 완료';
+            console.log(guideText);
+            var guideTextField = new c.Text(guideText, fontSize, fontColor);
+            guideTextField.x = offsetX;
+            guideTextField.y = offsetY;
+            stage.addChild(guideTextField);
+            stage.update();
+
+            assert.equal(0, 0, '테스트 완료');
+        });
+
+        isTestDone = true;
     }
 
 </script>

@@ -9,10 +9,10 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <div id="content">
-    <canvas id="canvas" width="300" height="160" style="background-color:#FFFFFF"></canvas>
+    <canvas id="canvas" width="360" height="180" style="background-color:#FFFFFF"></canvas>
 </div>
 <div id="colorField">
-    <canvas id="input" width="350" height="50" style="background-color:#FFFFFF"></canvas>
+    <canvas id="input" width="360" height="50" style="background-color:#FFFFFF"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
 <script src="../vendor/easeljs-0.8.1.combined.js"></script>
@@ -62,12 +62,17 @@
         }
     }
 
+    var offsetX = 24;
+    var fontSize = '16px Arial';
+    var fontColor = '#27AE60';
+
+
     var input = new CanvasInput({
         canvas: document.getElementById('input'),
         fontSize: 18,
         fontFamily: 'Arial',
-        fontColor: '#212121',
-        fontWeight: 'bold',
+        fontColor: fontColor,
+        //fontWeight: 'bold',
         width: 140,
         padding: 8,
         borderWidth: 1,
@@ -75,7 +80,7 @@
         borderRadius: 3,
         boxShadow: '1px 1px 0px #fff',
         innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
-        placeHolder: '#000000, Black'
+        placeHolder: '#8BC34A, GREEN'
     });
 
     var penSizeSlider;
@@ -86,6 +91,9 @@
     var isDoneSizeTest = false;
     var isDoneAlphaTest = false;
 
+
+
+
     function handleLoadComplete() {
         console.log('[[handleLoadComplete]]');
         ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
@@ -93,13 +101,13 @@
 
         penSizeDisplayer = new nts.Painter.PenSizeDisplayer(1, 1, '#000000', lib.PenSizeDisplayerBg);
         penSizeDisplayer.x = 30;
-        penSizeDisplayer.y = 30;
+        penSizeDisplayer.y = 36;
         stage.addChild(penSizeDisplayer);
 
         penSizeSlider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
         penSizeSlider.setMinValue(0);
         penSizeSlider.setMaxValue(50);
-        penSizeSlider.x = 24;
+        penSizeSlider.x = offsetX;
         penSizeSlider.y = penSizeDisplayer.y + penSizeDisplayer.height + 20;
         stage.addChild(penSizeSlider);
 
@@ -108,7 +116,7 @@
         penAlphaSlider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
         penAlphaSlider.setMinValue(0);
         penAlphaSlider.setMaxValue(1);
-        penAlphaSlider.x = 24;
+        penAlphaSlider.x = offsetX;
         penAlphaSlider.y = penSizeDisplayer.y + penSizeDisplayer.height + 50;
         stage.addChild(penAlphaSlider);
 
@@ -147,7 +155,7 @@
             assert.equal(penSizeDisplayer.getPenAlpha(), 1, 'penAlpha 최대값은 1입니다..');
         });
 
-        QUnit.test('PenSizeDisplayer penColor 기본값 테스트', function (assert) {
+        QUnit.test('PenSizeDisplayer penColor 변경 테스트', function (assert) {
             assert.equal(penSizeDisplayer.getPenColor(), '#000000', 'penColor 기본값은 #000000입니다..');
 
             testSize();
@@ -155,9 +163,11 @@
 
         function testSize() {
             QUnit.test('사이즈 변경 테스트', function (assert) {
-                var guideText = '첫 번째 슬라이더를 맨 오른쪽으로 이동하세요.';
+                var guideText = '첫 번째 슬라이더를 오른쪽 끝으로 이동하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = 8;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -187,9 +197,11 @@
 
         function testAlpha() {
             QUnit.test('알파 변경 테스트', function (assert) {
-                var guideText = '두 번째 슬라이더를 맨 오른쪽으로 이동하세요.';
+                var guideText = '두 번째 슬라이더를 오른쪽 끝으로 이동하세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = 8;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -224,7 +236,9 @@
             QUnit.test('색상 값 테스트', function (assert) {
                 var guideText = '색상 값을 입력하고 Enter 를 누르세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, fontSize, fontColor);
+                guideTextField.x = offsetX;
+                guideTextField.y = 8;
                 stage.addChild(guideTextField);
                 stage.update();
 
@@ -232,29 +246,23 @@
 
                 input.onsubmit(function () {
                     penSizeDisplayer.setPenColor(input.value());
-
                     console.log('input.value()', input.value());
-                })
-
-                eventListener = penAlphaSlider.on('sliderChange', function () {
-                    console.log('sliderChange', 'value', penAlphaSlider.getValue());
-
-                    penSizeDisplayer.setPenAlpha(penAlphaSlider.getValue());
-
-                    if (penAlphaSlider.getValue() == penAlphaSlider.getMaxValue()) {
-                        assert.equal(penSizeDisplayer.getPenAlpha(), penAlphaSlider.getMaxValue(), '알파가 변하는지 확인 합니다.');
-                        done();
-
-                        penSizeSlider.off('sliderChange', eventListener);
-                        stage.removeChild(guideTextField);
-
-                        setTimeout(testColor, 500);
-                    }
-                })
+                    assert.equal(0, 0, '');
+                    done();
+                    testComplete();
+                });
             });
         }
+    }
 
+    var isTestDone = false;
+    function testComplete() {
+        if(isTestDone) return;
+        QUnit.test('테스트 완료', function (assert) {
+            assert.equal(0, 0, '테스트 완료');
+        });
 
+        isTestDone = true;
     }
 
 </script>

@@ -9,10 +9,10 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <div id="content">
-    <canvas id="canvas" width="500" height="240" style="background-color:#FFFFFF"></canvas>
+    <canvas id="canvas" width="360" height="220" style="background-color:#FFFFFF"></canvas>
 </div>
 <div id="colorField">
-    <canvas id="input" width="350" height="50" style="background-color:#FFFFFF"></canvas>
+    <canvas id="input" width="360" height="50" style="background-color:#FFFFFF"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
 <script src="../vendor/easeljs-0.8.1.combined.js"></script>
@@ -61,12 +61,15 @@
         }
     }
 
+
+    var offsetX = 24;
+
     var input = new CanvasInput({
         canvas: document.getElementById('input'),
         fontSize: 18,
         fontFamily: 'Arial',
-        fontColor: '#212121',
-        fontWeight: 'bold',
+        fontColor: '#27ae60',
+        //fontWeight: 'bold',
         width: 140,
         padding: 8,
         borderWidth: 1,
@@ -74,15 +77,12 @@
         borderRadius: 3,
         boxShadow: '1px 1px 0px #fff',
         innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
-        placeHolder: '#000000, Black'
+        placeHolder: '#FFEB3B, Black'
     });
 
     var penSizeSlider;
     var penAlphaSlider;
     var colorMagnifier;
-
-    var showButton;
-    var hideButton;
 
     var isDoneSizeTest = false;
     var isDoneAlphaTest = false;
@@ -92,7 +92,7 @@
         ss['Assets_atlas_'] = queue.getResult('Assets_atlas_');
         queue = null;
 
-        colorMagnifier = new nts.Painter.ColorMagnifier(1, 1, '#68b9b8', lib.ColorMagnifier);
+        colorMagnifier = new nts.Painter.ColorMagnifier(1, 1, '#27ae60', lib.ColorMagnifier);
         colorMagnifier.x = 30;
         colorMagnifier.y = 30;
         stage.addChild(colorMagnifier);
@@ -100,7 +100,7 @@
         penSizeSlider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
         penSizeSlider.setMinValue(0);
         penSizeSlider.setMaxValue(colorMagnifier.width);
-        penSizeSlider.x = 24;
+        penSizeSlider.x = offsetX;
         penSizeSlider.y = colorMagnifier.y + colorMagnifier.height + 20;
         stage.addChild(penSizeSlider);
 
@@ -109,7 +109,7 @@
         penAlphaSlider = new nts.Painter.Slider(lib.SliderKnob, lib.SliderTrack, lib.SliderTrackGradient);
         penAlphaSlider.setMinValue(0);
         penAlphaSlider.setMaxValue(1);
-        penAlphaSlider.x = 24;
+        penAlphaSlider.x = offsetX;
         penAlphaSlider.y = colorMagnifier.y + colorMagnifier.height + 50;
         stage.addChild(penAlphaSlider);
 
@@ -126,7 +126,7 @@
 
         QUnit.test('PenSizeDisplayer penSize 최대값 테스트', function (assert) {
             colorMagnifier.setSize(200);
-            assert.equal(colorMagnifier.getSize(), colorMagnifier.width, 'penSize 최대값은 colorMagnifier.width 입니다..');
+            assert.equal(colorMagnifier.getSize(), colorMagnifier.width, 'penSize 최대값은 colorMagnifier.width 입니다.');
         });
 
         QUnit.test('PenSizeDisplayer penSize 최소값 테스트', function (assert) {
@@ -145,43 +145,26 @@
 
         QUnit.test('PenSizeDisplayer penAlpha 최대값 테스트', function (assert) {
             colorMagnifier.setAlpha(200);
-            assert.equal(colorMagnifier.getAlpha(), 1, 'penAlpha 최대값은 1입니다..');
+            assert.equal(colorMagnifier.getAlpha(), 1, 'penAlpha 최대값은 1입니다.');
         });
 
-        QUnit.test('PenSizeDisplayer penColor 기본값 테스트', function (assert) {
-            assert.equal(colorMagnifier.getColor(), '#000000', 'penColor 기본값은 #000000입니다..');
+        QUnit.test('PenSizeDisplayer penColor 변경 테스트', function (assert) {
+            assert.equal(0, 0, 'penColor 변경 되는지 확인 합니다.');
 
             testColor();
         });
 
 
-        showButton = getButton();
-        showButton.x = colorMagnifier.width + 40;
-        showButton.y = 40;
-
-        showButton.on('click', function () {
-            colorMagnifier.show();
-        });
-
-        hideButton = getButton();
-        hideButton.x = colorMagnifier.width + 40;
-        hideButton.y = 90;
-
-        hideButton.on('click', function(){
-            colorMagnifier.hide();
-        });
-
-
         function testColor() {
-            QUnit.test('색상 값 테스트', function (assert) {
+            QUnit.test('색상 변경 테스트', function (assert) {
                 var guideText = '색상 값을 입력하고 Enter 를 누르세요.';
                 console.log(guideText);
-                var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+                var guideTextField = new c.Text(guideText, '16px Arial', '#27ae60');
+                guideTextField.y = 8;
                 stage.addChild(guideTextField);
                 stage.update();
 
                 var done = assert.async();
-
 
                 penSizeSlider.setValue(92);
                 penAlphaSlider.setValue(1);
@@ -189,10 +172,13 @@
                 colorMagnifier.setAlpha(1);
 
 
-                input.onsubmit(function () {
-                    colorMagnifier.setPenColor(input.value());
+                input.onsubmit(function() {
+                    assert.equal(0, 0, '테스트 완료');
+                    done();
+                    colorMagnifier.setColor(input.value());
                     console.log('input.value()', input.value());
-                })
+                    testComplete();
+                });
 
                 penSizeSlider.on('sliderChange', function () {
                     colorMagnifier.setSize(penSizeSlider.getValue());
@@ -203,26 +189,30 @@
                 });
             });
         }
-
-
-        function getButton() {
-            var btn = new c.Shape();
-            var btnWidth = 80;
-            var btnHeight = 40;
-            btn.graphics
-                //.setStrokeStyle(1)
-                //.beginStroke('red')
-                    .beginFill('orange')
-                    .drawRoundRect(0, 0, btnWidth, btnHeight, 4)
-                    .endFill();
-            btn.x = 20;
-            btn.y = 10;
-            stage.addChild(btn);
-            stage.update();
-            return btn;
-        }
-
     }
+
+
+    var isTestDone = false;
+    function testComplete() {
+        if(isTestDone) return;
+        QUnit.test('테스트 완료', function (assert) {
+            assert.equal(0, 0, '테스트 완료');
+        });
+
+        isTestDone = true;
+    }
+
+
+    function getText(msg) {
+        var guideText = msg;
+        console.log(guideText);
+        var guideTextField = new c.Text(guideText, '16px Arial', '#27ae60');
+        guideTextField.x = offsetX + 2;
+        stage.addChild(guideTextField);
+        stage.update();
+        return guideTextField;
+    }
+
 
 </script>
 </body>

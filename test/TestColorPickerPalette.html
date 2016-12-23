@@ -9,10 +9,10 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <div id="button">
-    <canvas id="buttonCanvas" width="500" height="60" style="background-color:#FFFFFF"></canvas>
+    <canvas id="buttonCanvas" width="360" height="60" style="background-color:#FFFFFF"></canvas>
 </div>
 <div id="content">
-    <canvas id="canvas" width="300" height="140" style="background-color:#FFFFFF"></canvas>
+    <canvas id="canvas" width="360" height="140" style="background-color:#FFFFFF"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
 <script src="../vendor/easeljs-0.8.1.combined.js"></script>
@@ -53,6 +53,10 @@
     queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
     queue.loadManifest(lib.properties.manifest);
 
+    var offsetX = 20;
+    var offsetY = 28;
+
+
 
     function handleFileLoad(evt) {
         var o = evt.item;
@@ -72,13 +76,16 @@
         queue = null;
 
         colorPickerPalette = new nts.Painter.ColorPickerPalette();
-        colorPickerPalette.x = 20;
-        colorPickerPalette.y = 20;
+        colorPickerPalette.x = offsetX;
+        colorPickerPalette.y = offsetY;
         stage.addChild(colorPickerPalette);
 
         colorRect = new c.Shape();
-        colorRect.x = 20;
-        colorRect.y = 80;
+        colorRect.graphics.beginFill('#9b59b6')
+                .drawRect(0, 0, colorPickerPalette.width, colorPickerPalette.height)
+                .endFill();
+        colorRect.x = offsetX;
+        colorRect.y = colorPickerPalette.y + colorPickerPalette.height + 10;
         stage.addChild(colorRect);
 
         startTest();
@@ -99,8 +106,8 @@
         QUnit.test('팔렛트 색상 추가 테스트', function (assert) {
 
             var count = 0;
-            var btn = createButton();
-            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(28회)');
+            var btn = getButton();
+            var guideTextField = getText('상단 버튼을 클릭 하세요.(28회)');
             var done = assert.async();
 
             eventListener = btn.on('click', function () {
@@ -111,6 +118,8 @@
                     btn.off('click', eventListener);
                     stage.removeChild(guideTextField);
                     buttonStage.removeChild(btn);
+                    stage.update();
+                    buttonStage.update();
                     setTimeout(morePushTest, 500);
                 }
 
@@ -131,8 +140,8 @@
         QUnit.test('색상 꽉 찼을 때 색상 추가하기', function (assert) {
 
             var count = 0;
-            var btn = createButton();
-            var guideTextField = createGuideText('상단 버튼을 클릭 하세요.(10회)');
+            var btn = getButton();
+            var guideTextField = getText('상단 버튼을 클릭 하세요.(10회)');
             var done = assert.async();
 
             eventListener = btn.on('click', function () {
@@ -143,6 +152,8 @@
                     btn.off('click', eventListener);
                     stage.removeChild(guideTextField);
                     buttonStage.removeChild(btn);
+                    stage.update();
+                    buttonStage.update();
                     setTimeout(paletteClickTest, 500);
                 }
                 var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -155,13 +166,13 @@
         QUnit.test('셀 선택 이벤트 테스트', function (assert) {
 
             var count = 0;
-            var guideTextField = createGuideText('셀을 클릭해주세요. (10회)');
+            var guideTextField = getText('셀을 클릭해주세요. (10회)');
             var done = assert.async();
 
             eventListener = colorPickerPalette.on('selectColor', function(event) {
                 colorRect.graphics.clear()
-                        .beginFill(colorPickerPalette.selectedColor)
-                        .drawRect(0, 0, 80, 40)
+                        .beginFill(colorPickerPalette.selectedColorVO.color)
+                        .drawRect(0, 0, colorPickerPalette.width, colorPickerPalette.height)
                         .endFill();
 
                 if (count++ == 10) {
@@ -169,37 +180,47 @@
                     done();
 
                     stage.removeChild(guideTextField);
+                    stage.update();
+                    testComplete();
                 }
 
                 stage.update();
+                buttonStage.update();
             });
         });
     }
 
-    function createGuideText(msg) {
+
+    var isTestDone = false;
+    function testComplete() {
+        if(isTestDone) return;
+        QUnit.test('테스트 완료', function (assert) {
+            assert.equal(0, 0, '테스트 완료');
+        });
+
+        isTestDone = true;
+    }
+
+    function getText(msg) {
         var guideText = msg;
         console.log(guideText);
-        var guideTextField = new c.Text(guideText, '20px', '#FF3300');
+        var guideTextField = new c.Text(guideText, '16px Arial', '#27ae60');
+        guideTextField.x = offsetX + 2;
         stage.addChild(guideTextField);
         stage.update();
         return guideTextField;
     }
 
-    function createButton() {
-        var btn = new c.Shape();
-        var btnWidth = 80;
-        var btnHeight = 40;
-        btn.graphics
-            //.setStrokeStyle(1)
-            //.beginStroke('red')
-                .beginFill('orange')
-                .drawRoundRect(0, 0, btnWidth, btnHeight, 4)
-                .endFill();
-        btn.x = 20;
-        btn.y = 10;
-        buttonStage.addChild(btn);
+    function getButton() {
+        var imageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAoCAYAAACYayaMAAAFKklEQVRoge2bbUyVVRzAf+fci6+QvMRQM8EgRW2hZEoQ+QJbyuZcLZqWLdnawA+ZTXM6t0ZflA+41LGCzUVz6ii0xgfJmg2MIN+YUBOoQMUP+AIKA0wQ7jl9uFyBy+XlIpcH772/7X445/zPc3/7779zz/M85wpGQ27YFMJnJyBFIrAMiMQknh3VtZ5GLLoJoa8Cl1H6LLW3ikm50eHsZYRT0WeXz2eqeQeId5HC39kvc1uUbkZznI5HX5J46dpIp40s+adfncmMSRkINiOFadSS7o7SFjS5NHfsYX1503Dhwyf/XNz7mMnyVroTKH0Pi07ljbJTQ4XJQUfSMfN7XBaTxDFv4p1EiiBM4iSlsZkkM+hK4bjyD0dM5pWQ75Big8sEPQWl8ii/u4VttZ32QwMrPx0z0SEnvIkfI6TcSHTINzjI9cDkJ8btxyTeHg8vj8Ek3qMk9nP77v7LTnHMOnxMhUjndqBeRoDSii4SWVVaZOvqrfyCBX74mI54E+8ipJD4cITv50x93PV4MChoN1LMNkTMU5DiBWbN3WFrWsv8zOJAfP1vYhLTDRPzFJRupqkplA1/t1kr39c/zZv4cUKKAAKDUsC27Ag+MFTInpmHaY4pQfd8mhcl946FH0NH7XH6krlRJVSHj6HjkyD5EMBMUexLSBFptE8/bm8j4LYzEyJIjUgnIzAUfwmoNmru57CxtoBK1xg+GVJG8/PyeWZMrDbapZc9VMckMVgltLQeJmDAfSKsjNhHtv99sq+nsLWxlqjgHWSH7uRM5CNm1fzkUuNRM920RiJFjNEevexn4ZV0stvu0dKnt6O7nrxryQRU5TuYs4TtfrOoaExja2MtAJWNB3jtzlX8fdeROi7eo0CLFRJYYLRHP2ankDb5JhnV8Yjz8YjzH5PWOomNz6WywhYzNcn6exCdaV08AeRMY3xHixQLzAjmGO3Rj4Z88nxT2L2whIyero7uevJu5nDBFvOwEFG5//GUG631nAlK5+v2zN5lJ2QxLe37yBlv/5Gied4M+Bnt0Y/OAjb9VQBAblQhYXeSWD3Mj++5up1sj8gkY14uaeEAbdTcz2btPxN0vbfiZwZ8jLaw8cmiQg4+Y1cLYSXoMFujnm8bHc28TU7t5olb5Y4Q+JiBNiDQaBeAQ1VJHBpBXIrLTcYBTasZTRMTJPlWkilato1V5sEjWlqzCag6PqA/N6qEmPZ4Fta5UG/suGsG6oD5Rpv0ks/qy462lD2EH0P7znX6qimV8U/g5AKE/lcCl4z28Ei0+NNMl6UIk3nAW5ankYquNrYEl6CDBwmw26IaSrcuFj0vyxuQYgKt+26O0g0cLJ0rrW/VdZ7RPh6F5gT5WKyPlLtVFkprg5U8A6UtPOj6CmzP81eer0YzxBbDy9ihj/LmxevQ9x1up96F0v8Z5uQJKN1KW+deW7M3+Qll9Wj2OpzkZWxQ+jPWlt+yNe3PiUhK437wnlZzAUrlEVe2qW+X/Yk1xd0HW1C6Yhy13B+lLlLX/pF9t+MTUoVLg5kxrRAplrlczN2x6As0PljLWxUt9kOOj4gnXWmkqWkNSp12uZw7Y9GnaGhJdJR4GP7PEZLfYndiEl8gxRQX6LknSj9Es4vXS7OGChvZwcxfVrzINPMBBOu9ZzmHQGnQ/Ein/pSEsvrhwp3LZFHsEnzEduAd7wm3PijdCvok3TqLlX9cGem00ZXx0ZenE+qXgNQJSLEUiESKwZ4luh9K3wFdg6IcVDFVXb+SWu70Der/oEOVMwWmoV0AAAAASUVORK5CYII=';
+        var imageObject = document.createElement('img');
+        imageObject.setAttribute('src', imageBase64);
+        var button = new c.Bitmap(imageObject);
+        button.x = offsetX + 2;
+        button.y = 50 / 2 - 20 / 2;
+        buttonStage.addChild(button);
         buttonStage.update();
-        return btn;
+        return button;
     }
 
 </script>
