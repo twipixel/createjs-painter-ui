@@ -11,9 +11,6 @@
 <div id="content">
     <canvas id="canvas" width="300" height="140" style="background-color:#FFFFFF"></canvas>
 </div>
-<div id="colorField">
-    <canvas id="output" width="50" height="50" style="background-color:#FFFFFF"></canvas>
-</div>
 <script src="./qunitjs/qunit/qunit.js"></script>
 <script src="../vendor/easeljs-0.8.1.combined.js"></script>
 <script src="../vendor/tweenjs-0.6.1.combined.js"></script>
@@ -63,7 +60,10 @@
     }
 
 
-    var outputContext = document.getElementById('output').getContext('2d');
+    var colorRect = new c.Shape();
+    var colorRectWidth = 28;
+    var colorRectHeight = 116;
+
 
     var hueBar;
     var eventListener;
@@ -75,7 +75,17 @@
         nts.hueBar = hueBar = new nts.Painter.HueBar(lib.HueBar, lib.HueBarSelector);
         hueBar.x = 20;
         hueBar.y = 20;
+
+        colorRect.x = 20 + 30 + 10;
+        colorRect.y = 20;
+        colorRect.width = colorRectWidth;
+        colorRect.height = colorRectHeight;
+        colorRect.graphics.beginFill('#03A9F4')
+                .drawRect(0, 0, colorRectWidth, colorRectHeight)
+                .endFill();
+
         stage.addChild(hueBar);
+        stage.addChild(colorRect);
 
         startTest();
         stage.update();
@@ -93,9 +103,10 @@
         });
 
         hueBar.on('colorChange', function (event) {
-            outputContext.clearRect(20, 0, 30, 30);
-            outputContext.fillStyle = hueBar.getVO().color;
-            outputContext.fillRect(20, 0, 30, 30);
+            colorRect.graphics.clear()
+                    .beginFill(hueBar.getVO().color)
+                    .drawRect(0, 0, colorRectWidth, colorRectHeight)
+                    .endFill();
         })
     }
 
