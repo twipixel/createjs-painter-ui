@@ -9,7 +9,7 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <div id="content">
-    <canvas id="canvas" width="360" height="220" style="background-color:#FFFFFF"></canvas>
+    <canvas id="canvas" width="420" height="220" style="background-color:#FFFFFF"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
 <script src="../vendor/easeljs-0.8.1.combined.js"></script>
@@ -261,7 +261,7 @@
                     stage.removeChild(guideTextField);
                     stage.update();
 
-                    setTimeout(testSliderUp, 300);
+                    setTimeout(testSliderUp, 1000);
                 })
             });
         }
@@ -287,7 +287,7 @@
                     stage.removeChild(guideTextField);
                     stage.update();
 
-                    testChangeCallbackAtDraggingFalse();
+                    setTimeout(testChangeCallbackAtDraggingFalse, 1000);
                 })
             });
         }
@@ -304,6 +304,7 @@
 
                 var done = assert.async();
 
+                var changeCount = 0;
                 slider.setEnableSliderChangeCallbackAtDragging(false);
 
                 eventListener = slider.on('sliderChange', function (event) {
@@ -311,11 +312,12 @@
                     assert.equal(slider.getValue(), slider.getValue(), '마우스 업 시 sliderChange 이벤트가 오는지 확인 합니다.');
                     done();
 
-                    slider.off('sliderChange', eventListener);
-                    stage.removeChild(guideTextField);
-                    stage.update();
-
-                    testChangeCallbackAtDraggingTrue();
+                    if (changeCount++ >= 1) {
+                        slider.off('sliderChange', eventListener);
+                        stage.removeChild(guideTextField);
+                        stage.update();
+                        setTimeout(testChangeCallbackAtDraggingTrue, 1000);
+                    }
                 })
             });
         }
@@ -336,15 +338,15 @@
                 slider.setEnableSliderChangeCallbackAtDragging(true);
 
                 eventListener = slider.on('sliderChange', function () {
-                    console.log('sliderChange', 'value', slider.getValue(), ', minValue: ' + slider.getMinValue() + ', maxValue: ' + slider.getMaxValue());
-                    assert.equal(slider.getValue(), slider.getValue(), '마우스 이동 시 sliderChange 이벤트가 오는지 확인 합니다.');
+                    console.log('count:', changeCount, 'sliderChange', 'value', slider.getValue(), ', minValue: ' + slider.getMinValue() + ', maxValue: ' + slider.getMaxValue(), 'count 가 120이 되면 종료됩니다.');
+                    assert.equal(slider.getValue(), slider.getValue(), '마우스 이동 시 sliderChange 이벤트가 오는지 확인 합니다. slider count 가 120이 되면 종료됩니다.');
 
-                    if (changeCount++ == 24) {
+                    if (changeCount++ >= 120) {
                         done();
                         slider.off('sliderChange', eventListener);
                         stage.removeChild(guideTextField);
                         stage.update();
-                        setTimeout(testComplete, 500);
+                        setTimeout(testComplete, 1000);
                     }
                 })
             });
