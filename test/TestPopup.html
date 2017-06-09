@@ -45,10 +45,10 @@
     <canvas id="popup-panel" width="360" height="200" style="background-color:#FFFFFF"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
-<script src="../vendor/easeljs-0.8.1.combined.js"></script>
-<script src="../vendor/tweenjs-0.6.1.combined.js"></script>
-<script src="../vendor/movieclip-0.8.1.combined.js"></script>
-<script src="../vendor/preloadjs-0.6.1.combined.js"></script>
+<script src="../vendor/easeljs-0.8.1.min.js"></script>
+<script src="../vendor/tweenjs-0.6.1.min.js"></script>
+<script src="../vendor/movieclip-0.8.1.min.js"></script>
+<script src="../vendor/preloadjs-0.6.1.min.js"></script>
 
 <!-- Namespace -->
 <script src="../src/js/namespace.js"></script>
@@ -74,6 +74,12 @@
     var stage = new c.Stage('canvas');
     var buttonStage = new c.Stage('buttonCanvas');
     var popupStage = new c.Stage('popup-panel');
+    var confirmButtonImageURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAoCAYAAACYayaMAAAFKklEQVRoge2bbUyVVRzAf+fci6+QvMRQM8EgRW2hZEoQ+QJbyuZcLZqWLdnawA+ZTXM6t0ZflA+41LGCzUVz6ii0xgfJmg2MIN+YUBOoQMUP+AIKA0wQ7jl9uFyBy+XlIpcH772/7X445/zPc3/7779zz/M85wpGQ27YFMJnJyBFIrAMiMQknh3VtZ5GLLoJoa8Cl1H6LLW3ikm50eHsZYRT0WeXz2eqeQeId5HC39kvc1uUbkZznI5HX5J46dpIp40s+adfncmMSRkINiOFadSS7o7SFjS5NHfsYX1503Dhwyf/XNz7mMnyVroTKH0Pi07ljbJTQ4XJQUfSMfN7XBaTxDFv4p1EiiBM4iSlsZkkM+hK4bjyD0dM5pWQ75Big8sEPQWl8ii/u4VttZ32QwMrPx0z0SEnvIkfI6TcSHTINzjI9cDkJ8btxyTeHg8vj8Ek3qMk9nP77v7LTnHMOnxMhUjndqBeRoDSii4SWVVaZOvqrfyCBX74mI54E+8ipJD4cITv50x93PV4MChoN1LMNkTMU5DiBWbN3WFrWsv8zOJAfP1vYhLTDRPzFJRupqkplA1/t1kr39c/zZv4cUKKAAKDUsC27Ag+MFTInpmHaY4pQfd8mhcl946FH0NH7XH6krlRJVSHj6HjkyD5EMBMUexLSBFptE8/bm8j4LYzEyJIjUgnIzAUfwmoNmru57CxtoBK1xg+GVJG8/PyeWZMrDbapZc9VMckMVgltLQeJmDAfSKsjNhHtv99sq+nsLWxlqjgHWSH7uRM5CNm1fzkUuNRM920RiJFjNEevexn4ZV0stvu0dKnt6O7nrxryQRU5TuYs4TtfrOoaExja2MtAJWNB3jtzlX8fdeROi7eo0CLFRJYYLRHP2ankDb5JhnV8Yjz8YjzH5PWOomNz6WywhYzNcn6exCdaV08AeRMY3xHixQLzAjmGO3Rj4Z88nxT2L2whIyero7uevJu5nDBFvOwEFG5//GUG631nAlK5+v2zN5lJ2QxLe37yBlv/5Gied4M+Bnt0Y/OAjb9VQBAblQhYXeSWD3Mj++5up1sj8gkY14uaeEAbdTcz2btPxN0vbfiZwZ8jLaw8cmiQg4+Y1cLYSXoMFujnm8bHc28TU7t5olb5Y4Q+JiBNiDQaBeAQ1VJHBpBXIrLTcYBTasZTRMTJPlWkilato1V5sEjWlqzCag6PqA/N6qEmPZ4Fta5UG/suGsG6oD5Rpv0ks/qy462lD2EH0P7znX6qimV8U/g5AKE/lcCl4z28Ei0+NNMl6UIk3nAW5ankYquNrYEl6CDBwmw26IaSrcuFj0vyxuQYgKt+26O0g0cLJ0rrW/VdZ7RPh6F5gT5WKyPlLtVFkprg5U8A6UtPOj6CmzP81eer0YzxBbDy9ihj/LmxevQ9x1up96F0v8Z5uQJKN1KW+deW7M3+Qll9Wj2OpzkZWxQ+jPWlt+yNe3PiUhK437wnlZzAUrlEVe2qW+X/Yk1xd0HW1C6Yhy13B+lLlLX/pF9t+MTUoVLg5kxrRAplrlczN2x6As0PljLWxUt9kOOj4gnXWmkqWkNSp12uZw7Y9GnaGhJdJR4GP7PEZLfYndiEl8gxRQX6LknSj9Es4vXS7OGChvZwcxfVrzINPMBBOu9ZzmHQGnQ/Ein/pSEsvrhwp3LZFHsEnzEduAd7wm3PijdCvok3TqLlX9cGem00ZXx0ZenE+qXgNQJSLEUiESKwZ4luh9K3wFdg6IcVDFVXb+SWu70Der/oEOVMwWmoV0AAAAASUVORK5CYII=';
+    var cancelButtonImageURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAoCAYAAACYayaMAAAE/ElEQVRoge2bW0yURxTHfzO7CAgol1qRqFhRoVq7aq0SqJW6JIUmxrSpt9amYprIE2JsrcSkpS+tTTRaQhpNjGsMii3ay4OojQ20W6hVqMSmYqNU6YNXDIqgctmZPlAUFlh26e5+CvtL9mFmzpnv/52cTL6ZOSsYDLZJISTEWZEiHZgLJGESTw1qricRh25A6D+BKpQ+wcWr5WRdfuDpNMIj6xPzphFq3gBiGVJEevqwIYvSjWj286BtO+mn/3bXzb3gH3kxltEjtiBYhRSmQYsc6ijtQGOj8UEei6sbBjIfOPg/pb6NmcJApnuA0rdw6LW8XHnYlZnsdyQfM7+kFjJCFAUC7yFSxGASh6hI2cpS+l0p+s78ginBvDD2K6RY4jOBwwWlDlJ9YzU5F1udh3pnfj5m5ow9EAi8l5ByBXPG7qGPWPcOfnrqZ5jEG/7QNWwwibewp3zk3N1z2SlPziTIVIr07As0gBsorWgnnbSKsq6uR5n/fWIEQabdgcD7CCkkQezm6/GhD7seDsbEbEKKOEOEDRekmMy4iRu6mp1pfmxGNOGR/2ASYYYJGy4o3UhDQzxL/rrbmfnhkdmBwPsJKaKIjsmCrmVH8I6hgnqRR22yHd31s+T1GLVZ7NQmGCTNG0jeBRCUpTxHiPzDaD2eYLPYSW5ewLN1/dtsn2kn455rG0NpaptsxsQrRuvoQWwBjZNm0+s8o+MMm6py+NydOYI3kBYGke2ZwFGvS/QKYaZFZqRINlpHD67lEHWtWzvYSnFSHhntdg66NUEs6xKsJN2/wOXwLIpHH2XlHd9I/V9oMV8CiUbr6A/L0x9TOzOPtFYbaedKqB/QI5blU7ayZeRFNp1fQ+6tZjISiyiOifWDWg+RIlEiGG+0jh4Ez2JdQgG1c+3UTJxBCBAZuoDcuHlYXLjFj1pKsWUPe0c1s/NCDl+0wvFLa1hxvZm0qXuonbaW5cH+egk30EyQQITROrrz4ZRP2REVzfnr+UyqWsYzVdnkNrWRHLeNY0nWvp0m7KRmehazWnaR/Hs267stM8frsxl3dhc1wZnstRRhC/fPe7hBhKAitQ0pgoxW4gnufO24Y2MoSt8xA3eBaKO1AJBQhB4T79LkdlMB3/lJjk/RNJnRNPC4BL9uFaJbpq6bXko+NqLOlfQws1ly/CzMJ9wwA3XANKOVDJr+9gUAoXb0GOfOevaeXEWW75W5RugLZuA0kGm0lkHjvC94UtDirKTdUTawZQCv06HLxX+X5VeQ4vFY94cDSl9hR8VE2Xmrrt3buQfwDpoDlODoPFLuUIUorQ2WNDxQ2kFL+5fQdZ6/8GQtmhKXTgG8hN7Hq6cuQfc73Fa9EaXvGaZpOKB0E3dbN3c1HwXfWlmPZnOfTgG8g9IfkFF9tavpXCciqUj9JlCt5gOUOkhq5cruXc4Va4obLatRusaPsoY+Sp2irvk95+6+K6RKZ49h9MhSpJjrc2FDHYf+jZstGbxec9t5qO8S8dfO3KShYRFKHfG5uKGMQx/myu30vgIPA/85QvJzyvuYxCdIEeIDeUMTpe+j2chLFYWuzNwrzPxh/lRGmrchWByo5XSB0qD5lla9HmvlgFfOnkWyLGUWQSIXeDNQ4dYNpZtAH6JDF7Lw1zPuug0ujfc9H0Z8hBWprUgxG0hCil4n50MWpa+DPo+iGlQ559p/ZG21xxvUfwGfk4CtcjAlQAAAAABJRU5ErkJggg==';
+    var confirmButton = document.createElement('img');
+    var cancelButton = document.createElement('img');
+    confirmButton.setAttribute('src', confirmButtonImageURL);
+    cancelButton.setAttribute('src', cancelButtonImageURL);
 
     ss = ss || {};
     images = images || {};
@@ -170,20 +176,16 @@
     }
 
     function getConfirmButton() {
-        var imageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAoCAYAAACYayaMAAAFKklEQVRoge2bbUyVVRzAf+fci6+QvMRQM8EgRW2hZEoQ+QJbyuZcLZqWLdnawA+ZTXM6t0ZflA+41LGCzUVz6ii0xgfJmg2MIN+YUBOoQMUP+AIKA0wQ7jl9uFyBy+XlIpcH772/7X445/zPc3/7779zz/M85wpGQ27YFMJnJyBFIrAMiMQknh3VtZ5GLLoJoa8Cl1H6LLW3ikm50eHsZYRT0WeXz2eqeQeId5HC39kvc1uUbkZznI5HX5J46dpIp40s+adfncmMSRkINiOFadSS7o7SFjS5NHfsYX1503Dhwyf/XNz7mMnyVroTKH0Pi07ljbJTQ4XJQUfSMfN7XBaTxDFv4p1EiiBM4iSlsZkkM+hK4bjyD0dM5pWQ75Big8sEPQWl8ii/u4VttZ32QwMrPx0z0SEnvIkfI6TcSHTINzjI9cDkJ8btxyTeHg8vj8Ek3qMk9nP77v7LTnHMOnxMhUjndqBeRoDSii4SWVVaZOvqrfyCBX74mI54E+8ipJD4cITv50x93PV4MChoN1LMNkTMU5DiBWbN3WFrWsv8zOJAfP1vYhLTDRPzFJRupqkplA1/t1kr39c/zZv4cUKKAAKDUsC27Ag+MFTInpmHaY4pQfd8mhcl946FH0NH7XH6krlRJVSHj6HjkyD5EMBMUexLSBFptE8/bm8j4LYzEyJIjUgnIzAUfwmoNmru57CxtoBK1xg+GVJG8/PyeWZMrDbapZc9VMckMVgltLQeJmDAfSKsjNhHtv99sq+nsLWxlqjgHWSH7uRM5CNm1fzkUuNRM920RiJFjNEevexn4ZV0stvu0dKnt6O7nrxryQRU5TuYs4TtfrOoaExja2MtAJWNB3jtzlX8fdeROi7eo0CLFRJYYLRHP2ankDb5JhnV8Yjz8YjzH5PWOomNz6WywhYzNcn6exCdaV08AeRMY3xHixQLzAjmGO3Rj4Z88nxT2L2whIyero7uevJu5nDBFvOwEFG5//GUG631nAlK5+v2zN5lJ2QxLe37yBlv/5Gied4M+Bnt0Y/OAjb9VQBAblQhYXeSWD3Mj++5up1sj8gkY14uaeEAbdTcz2btPxN0vbfiZwZ8jLaw8cmiQg4+Y1cLYSXoMFujnm8bHc28TU7t5olb5Y4Q+JiBNiDQaBeAQ1VJHBpBXIrLTcYBTasZTRMTJPlWkilato1V5sEjWlqzCag6PqA/N6qEmPZ4Fta5UG/suGsG6oD5Rpv0ks/qy462lD2EH0P7znX6qimV8U/g5AKE/lcCl4z28Ei0+NNMl6UIk3nAW5ankYquNrYEl6CDBwmw26IaSrcuFj0vyxuQYgKt+26O0g0cLJ0rrW/VdZ7RPh6F5gT5WKyPlLtVFkprg5U8A6UtPOj6CmzP81eer0YzxBbDy9ihj/LmxevQ9x1up96F0v8Z5uQJKN1KW+deW7M3+Qll9Wj2OpzkZWxQ+jPWlt+yNe3PiUhK437wnlZzAUrlEVe2qW+X/Yk1xd0HW1C6Yhy13B+lLlLX/pF9t+MTUoVLg5kxrRAplrlczN2x6As0PljLWxUt9kOOj4gnXWmkqWkNSp12uZw7Y9GnaGhJdJR4GP7PEZLfYndiEl8gxRQX6LknSj9Es4vXS7OGChvZwcxfVrzINPMBBOu9ZzmHQGnQ/Ein/pSEsvrhwp3LZFHsEnzEduAd7wm3PijdCvok3TqLlX9cGem00ZXx0ZenE+qXgNQJSLEUiESKwZ4luh9K3wFdg6IcVDFVXb+SWu70Der/oEOVMwWmoV0AAAAASUVORK5CYII=';
-        return getButton(imageBase64);
+        return getButton(confirmButton);
     }
 
 
     function getCancelButton() {
-        var imageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAAAoCAYAAACYayaMAAAE/ElEQVRoge2bW0yURxTHfzO7CAgol1qRqFhRoVq7aq0SqJW6JIUmxrSpt9amYprIE2JsrcSkpS+tTTRaQhpNjGsMii3ay4OojQ20W6hVqMSmYqNU6YNXDIqgctmZPlAUFlh26e5+CvtL9mFmzpnv/52cTL6ZOSsYDLZJISTEWZEiHZgLJGESTw1qricRh25A6D+BKpQ+wcWr5WRdfuDpNMIj6xPzphFq3gBiGVJEevqwIYvSjWj286BtO+mn/3bXzb3gH3kxltEjtiBYhRSmQYsc6ijtQGOj8UEei6sbBjIfOPg/pb6NmcJApnuA0rdw6LW8XHnYlZnsdyQfM7+kFjJCFAUC7yFSxGASh6hI2cpS+l0p+s78ginBvDD2K6RY4jOBwwWlDlJ9YzU5F1udh3pnfj5m5ow9EAi8l5ByBXPG7qGPWPcOfnrqZ5jEG/7QNWwwibewp3zk3N1z2SlPziTIVIr07As0gBsorWgnnbSKsq6uR5n/fWIEQabdgcD7CCkkQezm6/GhD7seDsbEbEKKOEOEDRekmMy4iRu6mp1pfmxGNOGR/2ASYYYJGy4o3UhDQzxL/rrbmfnhkdmBwPsJKaKIjsmCrmVH8I6hgnqRR22yHd31s+T1GLVZ7NQmGCTNG0jeBRCUpTxHiPzDaD2eYLPYSW5ewLN1/dtsn2kn455rG0NpaptsxsQrRuvoQWwBjZNm0+s8o+MMm6py+NydOYI3kBYGke2ZwFGvS/QKYaZFZqRINlpHD67lEHWtWzvYSnFSHhntdg66NUEs6xKsJN2/wOXwLIpHH2XlHd9I/V9oMV8CiUbr6A/L0x9TOzOPtFYbaedKqB/QI5blU7ayZeRFNp1fQ+6tZjISiyiOifWDWg+RIlEiGG+0jh4Ez2JdQgG1c+3UTJxBCBAZuoDcuHlYXLjFj1pKsWUPe0c1s/NCDl+0wvFLa1hxvZm0qXuonbaW5cH+egk30EyQQITROrrz4ZRP2REVzfnr+UyqWsYzVdnkNrWRHLeNY0nWvp0m7KRmehazWnaR/Hs267stM8frsxl3dhc1wZnstRRhC/fPe7hBhKAitQ0pgoxW4gnufO24Y2MoSt8xA3eBaKO1AJBQhB4T79LkdlMB3/lJjk/RNJnRNPC4BL9uFaJbpq6bXko+NqLOlfQws1ly/CzMJ9wwA3XANKOVDJr+9gUAoXb0GOfOevaeXEWW75W5RugLZuA0kGm0lkHjvC94UtDirKTdUTawZQCv06HLxX+X5VeQ4vFY94cDSl9hR8VE2Xmrrt3buQfwDpoDlODoPFLuUIUorQ2WNDxQ2kFL+5fQdZ6/8GQtmhKXTgG8hN7Hq6cuQfc73Fa9EaXvGaZpOKB0E3dbN3c1HwXfWlmPZnOfTgG8g9IfkFF9tavpXCciqUj9JlCt5gOUOkhq5cruXc4Va4obLatRusaPsoY+Sp2irvk95+6+K6RKZ49h9MhSpJjrc2FDHYf+jZstGbxec9t5qO8S8dfO3KShYRFKHfG5uKGMQx/myu30vgIPA/85QvJzyvuYxCdIEeIDeUMTpe+j2chLFYWuzNwrzPxh/lRGmrchWByo5XSB0qD5lla9HmvlgFfOnkWyLGUWQSIXeDNQ4dYNpZtAH6JDF7Lw1zPuug0ujfc9H0Z8hBWprUgxG0hCil4n50MWpa+DPo+iGlQ559p/ZG21xxvUfwGfk4CtcjAlQAAAAABJRU5ErkJggg==';
-        return getButton(imageBase64);
+        return getButton(cancelButton);
     }
 
 
-    function getButton(url) {
-        var imageObject = document.createElement('img');
-        imageObject.setAttribute('src', url);
+    function getButton(imageObject) {
         var button = new c.Bitmap(imageObject);
         buttonStage.addChild(button);
         buttonStage.update();
