@@ -15,7 +15,7 @@
     <canvas id="color-panel" width="104" height="135"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
-<script src="../vendor/easeljs-0.8.2.min.js"></script>
+<script src="../vendor/easeljs-0.8.1.min.js"></script>
 
 <!-- Namespace -->
 <script src="../src/js/namespace.js"></script>
@@ -78,8 +78,14 @@
 
     stage.addChild(shape);
 
-    window.onload = stage.update;
-    window.onresize = stage.update;
+    window.onload = update;
+    window.onresize = update;
+
+    function update() {
+        if (stage) {
+            stage.update();
+        }
+    }
 
     ///////////////////////////////////////////////////////
     // 테스트 콘테이너 생성

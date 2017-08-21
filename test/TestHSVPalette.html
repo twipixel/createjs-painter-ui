@@ -12,7 +12,7 @@
     <canvas id="canvas" width="360" height="180" style="background-color:#FFFFFF"></canvas>
 </div>
 <script src="./qunitjs/qunit/qunit.js"></script>
-<script src="../vendor/easeljs-0.8.2.min.js"></script>
+<script src="../vendor/easeljs-0.8.1.min.js"></script>
 <script src="../vendor/tweenjs-0.6.1.min.js"></script>
 <script src="../vendor/movieclip-0.8.1.min.js"></script>
 <script src="../vendor/preloadjs-0.6.1.min.js"></script>
@@ -52,8 +52,14 @@
     queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
     queue.loadManifest(lib.properties.manifest);
 
-    window.onload = stage.update;
-    window.onresize = stage.update;
+    window.onload = update;
+    window.onresize = update;
+
+    function update() {
+        if (stage) {
+            stage.update();
+        }
+    }
 
     function handleFileLoad(evt) {
         var o = evt.item;
