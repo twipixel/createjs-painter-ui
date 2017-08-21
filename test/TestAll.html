@@ -153,6 +153,9 @@
     queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
     queue.loadManifest(lib.properties.manifest);
 
+    window.onload = stage.update;
+    window.onresize = stage.update;
+
 
     function initProgressBmp() {
         var shape = new c.Shape();

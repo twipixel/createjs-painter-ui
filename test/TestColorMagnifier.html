@@ -52,6 +52,8 @@
     // load our assets, starting with evmovieclip-0.8.1.min.jserything we need to render the spritesheet:
     queue.loadFile({src: './assets/Assets_atlas_.json', type: 'spritesheet', id: 'Assets_atlas_'}, true);
 
+    window.onload = stage.update;
+    window.onresize = stage.update;
 
     function handleFileLoad(evt) {
         var o = evt.item;

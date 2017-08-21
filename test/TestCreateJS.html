@@ -78,6 +78,8 @@
 
     stage.addChild(shape);
 
+    window.onload = stage.update;
+    window.onresize = stage.update;
 
     ///////////////////////////////////////////////////////
     // 테스트 콘테이너 생성
